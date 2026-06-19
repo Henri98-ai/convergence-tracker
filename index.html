@@ -456,7 +456,7 @@ function cardHtml(t){
   const color=teamColorMap[t.team]||'#9A9790';
   return`<div class="tcard ${arrived?'arrived':'notyet'}">
     <div class="tt">
-      <span class="tid">${t.id}</span>
+      <a class="tid" href="${JIRA}/browse/${t.id}" target="_blank" style="text-decoration:none">${t.id} ↗</a>
       <span class="type-badge ${typeCls}">${t.issueType}</span>
       <span class="ttitle" title="${t.title}">${t.title}</span>
       <span class="rbadge ${arrived?'r-arr':'r-not'}">${arrived?'Arrivé à tester':'Pas encore prêt'}</span>
