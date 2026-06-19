@@ -96,15 +96,23 @@ input[type=date]{padding:0 8px}
 <div class="card">
   <div class="grid2">
     <div><label>Email Atlassian</label><input type="email" id="email" placeholder="prenom.nom@isagri.com"></div>
-    <div><label>Token API</label><input type="password" id="token" placeholder="Collez votre token ici"></div>
+    <div>
+        <label>Token API</label>
+        <input type="password" id="token" placeholder="Collez votre token ici">
+        <div style="margin-top:6px;display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="rememberToken" style="width:14px;height:14px;margin:0;cursor:pointer">
+          <label for="rememberToken" style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;cursor:pointer;margin:0">Se souvenir du token sur cet appareil</label>
+        </div>
+      </div>
   </div>
   <div class="grid3">
     <div><label>Colonne "à tester"</label><input type="text" id="colTester" value="6 - A tester en dev"></div>
-    <div><label>Requêtes simultanées</label>
+    <div><label>Vitesse de chargement</label>
       <select id="batchSize">
-        <option value="3">3 (réseau lent)</option>
-        <option value="5" selected>5 (recommandé)</option>
-        <option value="8">8 (rapide)</option>
+        <option value="3">Lente (réseau instable)</option>
+        <option value="5">Normale</option>
+        <option value="8">Rapide</option>
+        <option value="12" selected>Très rapide (recommandé)</option>
       </select>
     </div>
     <div><label>&nbsp;</label><button class="btn btn-p" onclick="connect()" style="width:100%">Charger les sprints →</button></div>
@@ -255,6 +263,9 @@ async function connect(){
     show('sprintBar');
     setStatus('ok','Connecté — '+sp.length+' sprints');
     localStorage.setItem('jira_email',em);
+    if(document.getElementById('rememberToken').checked){
+      localStorage.setItem('jira_token',tk);
+    }
   }catch(e){setStatus('err','Erreur : '+e.message);}
 }
 
@@ -493,7 +504,21 @@ function toggleAR(){
 function fd(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});}
 function fdShort(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});}
 
-window.addEventListener('load',()=>{const s=localStorage.getItem('jira_email');if(s)document.getElementById('email').value=s;});
+window.addEventListener('load',()=>{
+  const em=localStorage.getItem('jira_email');
+  if(em)document.getElementById('email').value=em;
+  const tk=localStorage.getItem('jira_token');
+  if(tk){document.getElementById('token').value=tk;document.getElementById('rememberToken').checked=true;}
+});
+document.getElementById('token')?.addEventListener('change',()=>{
+  if(document.getElementById('rememberToken').checked){
+    localStorage.setItem('jira_token',document.getElementById('token').value);
+  }
+});
+document.getElementById('rememberToken')?.addEventListener('change',function(){
+  if(!this.checked){localStorage.removeItem('jira_token');}
+  else{localStorage.setItem('jira_token',document.getElementById('token').value);}
+});
 </script>
 </body>
 </html>
