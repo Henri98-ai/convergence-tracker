@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convergence Tracker — Projet MP</title>
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --border: #E4E2DA;
+    --border-light: #EDEBE5;
+    --text: #1A1916;
+    --text-2: #5A5854;
+    --text-3: #9A9790;
+    --red: #C8392B;
+    --red-bg: #FDF1EF;
+    --red-border: #F0C4BE;
+    --amber: #B45309;
+    --amber-bg: #FEFCE8;
+    --amber-border: #F0D88A;
+    --green: #2D6A2D;
+    --green-bg: #F0F7EE;
+    --green-border: #B4D9B4;
+    --blue: #1D5FA4;
+    --blue-bg: #EEF4FB;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', monospace;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* LAYOUT */
+  .page { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 36px; height: 36px; background: var(--text); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 20px; height: 20px; fill: white; }
+  .logo-text h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .logo-text p { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+
+  /* CONFIG PANEL */
+  .config { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+  .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .config-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .field label { display: block; font-size: 11px; font-weight: 500; color: var(--text-2); margin-bottom: 4px; letter-spacing: 0.03em; text-transform: uppercase; }
+  .field input, .field select { width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: var(--font); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
+  .field input:focus, .field select:focus { border-color: var(--blue); }
+  .field input[type=password] { font-family: var(--mono); letter-spacing: 0.05em; }
+  .config-footer { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn { height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: opacity 0.15s; white-space: nowrap; font-family: var(--font); }
+  .btn-primary { background: var(--text); color: white; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border-light); }
+  .status { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+  .dot.ok { background: var(--green); }
+  .dot.err { background: var(--red); }
+  .dot.loading { background: var(--amber); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* SPRINT SELECTOR */
+  #sprintBar { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+  .sprint-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .sprint-row .field { flex: 1; min-width: 200px; }
+
+  /* MAIN CONTENT */
+  #main { display: none; }
+
+  /* SPRINT META */
+  .sprint-meta { margin-bottom: 1.5rem; }
+  .sprint-name { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 2px; }
+  .sprint-dates { font-size: 12px; color: var(--text-3); }
+
+  /* ALERT */
+  .alert { background: var(--red-bg); border: 1px solid var(--red-border); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 1.5rem; display: flex; gap: 12px; align-items: flex-start; }
+  .alert-icon { font-size: 18px; flex-shrink: 0; }
+  .alert-body { font-size: 13px; color: #7A1E14; line-height: 1.55; }
+  .alert-body strong { font-weight: 600; }
+
+  /* METRICS */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  @media(max-width:600px) { .metrics { grid-template-columns: repeat(2,1fr); } }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+  .metric-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+  .metric-value { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; }
+  .metric-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .v-red { color: var(--red); }
+  .v-amber { color: var(--amber); }
+  .v-green { color: var(--green); }
+
+  /* HISTOGRAM */
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+  .chart-title { font-size: 12px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+  .histo-wrap { position: relative; }
+  .histo { display: flex; align-items: flex-end; gap: 4px; height: 90px; }
+  .histo-col { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
+  .histo-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 2px; transition: opacity 0.15s; }
+  .histo-bar:hover { opacity: 0.75; }
+  .histo-val { font-size: 9px; font-weight: 600; color: var(--text-2); }
+  .histo-lbl { font-size: 9px; color: var(--text-3); }
+  .seuil-indicator { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .seuil-line-h { flex: 1; height: 1px; background: var(--red); opacity: 0.4; }
+  .seuil-tag { font-size: 10px; color: var(--red); font-weight: 500; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 2px; margin-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 14px; font-size: 13px; font-weight: 500; color: var(--text-3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+  /* TICKET LIST */
+  .ticket-list { display: flex; flex-direction: column; gap: 8px; }
+  .tcard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); border-left-width: 3px; }
+  .tcard.late { border-left-color: var(--red); }
+  .tcard.medium { border-left-color: var(--amber); }
+  .tcard.ok { border-left-color: var(--green); }
+  .tcard.notyet { border-left-color: var(--border); }
+  .tcard-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .tid { font-size: 11px; font-weight: 600; color: var(--blue); font-family: var(--mono); flex-shrink: 0; }
+  .ttitle { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rbadge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; flex-shrink: 0; }
+  .rb-late { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .rb-medium { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .rb-ok { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .rb-notyet { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+  .tcard-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-3); flex-wrap: wrap; align-items: center; }
+  .tcard-meta span { display: flex; align-items: center; gap: 4px; }
+  .delay-pill { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-left: auto; }
+  .dp-red { background: var(--red-bg); color: var(--red); }
+  .dp-amber { background: var(--amber-bg); color: var(--amber); }
+  .empty { text-align: center; padding: 3rem; color: var(--text-3); font-size: 13px; }
+
+  /* REFRESH */
+  .refresh-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px; }
+  .refresh-info { font-size: 11px; color: var(--text-3); }
+  .legend { display: flex; gap: 12px; font-size: 11px; color: var(--text-3); flex-wrap: wrap; margin-bottom: 10px; }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  .section-count { font-size: 12px; color: var(--text-3); }
+
+  .loading-overlay { text-align: center; padding: 3rem; font-size: 13px; color: var(--text-3); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      </div>
+      <div class="logo-text">
+        <h1>Convergence Tracker</h1>
+        <p>Projet MP — isagri.atlassian.net</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONFIG -->
+  <div class="config">
+    <div class="config-grid">
+      <div class="field">
+        <label>Email Atlassian</label>
+        <input type="email" id="email" placeholder="prenom.nom@isagri.com">
+      </div>
+      <div class="field">
+        <label>Token API</label>
+        <input type="password" id="token" placeholder="Collez votre token ici">
+      </div>
+    </div>
+    <div class="config-grid-3">
+      <div class="field">
+        <label>Colonne "à tester"</label>
+        <input type="text" id="colTester" value="6 - A tester en dev">
+      </div>
+      <div class="field">
+        <label>Seuil "tardif" (jours)</label>
+        <select id="seuil">
+          <option value="3">J+3</option>
+          <option value="4">J+4</option>
+          <option value="5" selected>J+5</option>
+          <option value="6">J+6</option>
+          <option value="7">J+7</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" onclick="connect()" style="width:100%">Charger les sprints →</button>
+      </div>
+    </div>
+    <div class="config-footer">
+      <div class="status"><div class="dot" id="dot"></div><span id="statusTxt">Non connecté</span></div>
+    </div>
+  </div>
+
+  <!-- SPRINT SELECTOR -->
+  <div id="sprintBar">
+    <div class="sprint-row">
+      <div class="field" style="flex:2">
+        <label>Sprint à analyser</label>
+        <select id="sprintSelect"></select>
+      </div>
+      <div class="field" style="flex:0">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" onclick="loadSprint()">Analyser →</button>
+      </div>
+      <div class="field" style="flex:0">
+        <label>&nbsp;</label>
+        <button class="btn btn-secondary" onclick="autoRefresh()" id="refreshBtn">⟳ Auto-refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div class="sprint-meta">
+      <div class="sprint-name" id="sprintName"></div>
+      <div class="sprint-dates" id="sprintDates"></div>
+    </div>
+
+    <div class="alert">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-body" id="alertText"></div>
+    </div>
+
+    <div class="metrics" id="metrics"></div>
+
+    <div class="chart-card">
+      <div class="chart-title">Délai d'arrivée en colonne "à tester" — distribution par jour</div>
+      <div class="histo" id="histo"></div>
+      <div class="seuil-indicator">
+        <div class="seuil-line-h"></div>
+        <div class="seuil-tag" id="seuilTag"></div>
+        <div class="seuil-line-h"></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'late')">Tardifs <span id="lateBadge"></span></div>
+      <div class="tab" onclick="switchTab(this,'all')">Tous les testés</div>
+      <div class="tab" onclick="switchTab(this,'notyet')">Pas encore à tester</div>
+    </div>
+
+    <div class="refresh-row">
+      <div class="legend">
+        <span><span class="leg-dot" style="background:var(--red)"></span>Tardif (après seuil)</span>
+        <span><span class="leg-dot" style="background:var(--amber)"></span>Limite (±1j du seuil)</span>
+        <span><span class="leg-dot" style="background:var(--green)"></span>Dans les temps</span>
+      </div>
+      <div class="refresh-info" id="lastRefresh"></div>
+    </div>
+
+    <div class="ticket-list" id="ticketList"></div>
+  </div>
+
+</div>
+
+<script>
+const JIRA = 'https://isagri.atlassian.net';
+const BOARD = 127;
+let auth = '';
+let sprintStart = null;
+let allTickets = [];
+let refreshTimer = null;
+let isAutoRefresh = false;
+
+function setStatus(state, msg) {
+  const dot = document.getElementById('dot');
+  dot.className = 'dot ' + (state === 'ok' ? 'ok' : state === 'err' ? 'err' : state === 'loading' ? 'loading' : '');
+  document.getElementById('statusTxt').textContent = msg;
+}
+
+async function apiFetch(path, params) {
+  let url = JIRA + path;
+  if (params) url += '?' + new URLSearchParams(params);
+  const res = await fetch(url, { headers: { 'Authorization': auth, 'Accept': 'application/json' } });
+  if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+  return res.json();
+}
+
+async function connect() {
+  const email = document.getElementById('email').value.trim();
+  const token = document.getElementById('token').value.trim();
+  if (!email || !token) { setStatus('err', 'Email et token requis'); return; }
+  auth = 'Basic ' + btoa(email + ':' + token);
+  setStatus('loading', 'Connexion...');
+  try {
+    const data = await apiFetch('/rest/agile/1.0/board/' + BOARD + '/sprint', { state: 'active,closed', maxResults: 20 });
+    const sprints = (data.values || []).reverse();
+    const sel = document.getElementById('sprintSelect');
+    sel.innerHTML = sprints.map(s =>
+      `<option value="${s.id}" data-start="${s.startDate||''}" data-end="${s.endDate||''}" data-name="${s.name}">${s.name} (${s.state})</option>`
+    ).join('');
+    document.getElementById('sprintBar').style.display = '';
+    setStatus('ok', `Connecté — ${sprints.length} sprints`);
+  } catch(e) {
+    setStatus('err', 'Erreur : ' + e.message);
+  }
+}
+
+async function loadSprint() {
+  const sel = document.getElementById('sprintSelect');
+  const opt = sel.selectedOptions[0];
+  const sprintId = sel.value;
+  sprintStart = opt.dataset.start ? new Date(opt.dataset.start) : null;
+
+  const colTester = document.getElementById('colTester').value.trim();
+  const seuil = parseInt(document.getElementById('seuil').value);
+
+  document.getElementById('main').style.display = '';
+  document.getElementById('sprintName').textContent = opt.dataset.name;
+  document.getElementById('sprintDates').textContent =
+    `Début : ${fmtDate(opt.dataset.start)} · Fin : ${fmtDate(opt.dataset.end)} · Colonne : "${colTester}" · Seuil : J+${seuil}`;
+  document.getElementById('ticketList').innerHTML = '<div class="loading-overlay">⏳ Chargement des tickets...</div>';
+  document.getElementById('metrics').innerHTML = '';
+  document.getElementById('alertText').textContent = '';
+  document.getElementById('histo').innerHTML = '';
+
+  setStatus('loading', 'Chargement...');
+
+  try {
+    const issuesData = await apiFetch('/rest/agile/1.0/sprint/' + sprintId + '/issue', { maxResults: 200, fields: 'summary,status,priority,assignee' });
+    const issues = issuesData.issues || [];
+
+    const enriched = await Promise.all(issues.map(async issue => {
+      try {
+        const cl = await apiFetch('/rest/api/3/issue/' + issue.key + '/changelog', { maxResults: 100 });
+        const transitions = [];
+        for (const h of cl.values || []) {
+          for (const item of h.items || []) {
+            if (item.field === 'status') {
+              transitions.push({ from: item.fromString, to: item.toString, date: h.created });
+            }
+          }
+        }
+        const arrival = transitions.find(t => t.to === colTester || t.to.toLowerCase().includes(colTester.toLowerCase().replace(/^\d+ - /,'')));
+        const arrivalDate = arrival ? new Date(arrival.date) : null;
+        const delay = arrivalDate && sprintStart ? Math.round((arrivalDate - sprintStart) / 86400000 * 10) / 10 : null;
+        const risk = delay === null ? 'notyet' : delay < seuil ? 'ok' : delay <= seuil + 1 ? 'medium' : 'late';
+        return {
+          id: issue.key,
+          title: issue.fields.summary,
+          status: issue.fields.status?.name || '?',
+          assignee: issue.fields.assignee?.displayName || '—',
+          arrivalDate, delay, risk, transitions
+        };
+      } catch { return { id: issue.key, title: issue.fields.summary, status: '?', assignee: '—', arrivalDate: null, delay: null, risk: 'notyet', transitions: [] }; }
+    }));
+
+    allTickets = enriched;
+    renderAll(enriched, seuil, colTester, opt.dataset.name);
+    setStatus('ok', 'Données à jour');
+    document.getElementById('lastRefresh').textContent = 'Mis à jour : ' + new Date().toLocaleTimeString('fr-FR');
+  } catch(e) {
+    setStatus('err', 'Erreur : ' + e.message);
+    document.getElementById('ticketList').innerHTML = '<div class="empty">❌ ' + e.message + '</div>';
+  }
+}
+
+function renderAll(enriched, seuil, col, sprintName) {
+  const late = enriched.filter(t => t.risk === 'late');
+  const medium = enriched.filter(t => t.risk === 'medium');
+  const notYet = enriched.filter(t => t.risk === 'notyet');
+  const arrived = enriched.filter(t => t.delay !== null);
+  const avg = arrived.length ? (arrived.reduce((s,t)=>s+t.delay,0)/arrived.length).toFixed(1) : '—';
+
+  document.getElementById('alertText').innerHTML =
+    `<strong>${late.length} tickets sur ${arrived.length} sont arrivés en "${col}" après J+${seuil} (${Math.round(late.length/Math.max(arrived.length,1)*100)}%).</strong> ` +
+    `Délai moyen : J+${avg}. ${notYet.length} tickets ne sont pas encore prêts à tester. ` +
+    `Ce constat prouve que les US arrivent trop tard pour permettre des tests métier en début de convergence.`;
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Tickets sprint</div><div class="metric-value">${enriched.length}</div><div class="metric-sub">total</div></div>
+    <div class="metric"><div class="metric-label">Tardifs</div><div class="metric-value v-red">${late.length}</div><div class="metric-sub">après J+${seuil}</div></div>
+    <div class="metric"><div class="metric-label">Délai moyen</div><div class="metric-value v-amber">J+${avg}</div><div class="metric-sub">seuil : J+${seuil}</div></div>
+    <div class="metric"><div class="metric-label">Non prêts</div><div class="metric-value" style="color:var(--text-2)">${notYet.length}</div><div class="metric-sub">pas encore testables</div></div>
+  `;
+
+  // Histogram
+  const buckets = {};
+  arrived.forEach(t => { const b = Math.floor(t.delay); buckets[b] = (buckets[b]||0)+1; });
+  const maxB = arrived.length ? Math.max(...Object.keys(buckets).map(Number)) : 0;
+  const maxV = arrived.length ? Math.max(...Object.values(buckets)) : 1;
+  let h = '';
+  for (let d = 0; d <= maxB; d++) {
+    const c = buckets[d]||0;
+    const height = c > 0 ? Math.max(6, Math.round(c/maxV*75)) : 3;
+    const color = d < seuil ? 'var(--green)' : d <= seuil+1 ? 'var(--amber)' : 'var(--red)';
+    h += `<div class="histo-col">
+      <div class="histo-val">${c>0?c:''}</div>
+      <div class="histo-bar" style="height:${height}px;background:${color}" title="J+${d} : ${c} ticket(s)"></div>
+      <div class="histo-lbl">J+${d}</div>
+    </div>`;
+  }
+  document.getElementById('histo').innerHTML = h;
+  document.getElementById('seuilTag').textContent = `Seuil J+${seuil}`;
+  document.getElementById('lateBadge').textContent = `(${late.length})`;
+
+  renderTab(currentTab, enriched, seuil);
+}
+
+let currentTab = 'late';
+function switchTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = tab;
+  const seuil = parseInt(document.getElementById('seuil').value);
+  renderTab(tab, allTickets, seuil);
+}
+
+function renderTab(tab, enriched, seuil) {
+  let list;
+  if (tab === 'late') list = enriched.filter(t=>t.risk==='late'||t.risk==='medium');
+  else if (tab === 'all') list = enriched.filter(t=>t.delay!==null);
+  else list = enriched.filter(t=>t.risk==='notyet');
+
+  const sorted = [...list].sort((a,b)=>(b.delay??999)-(a.delay??999));
+  if (!sorted.length) { document.getElementById('ticketList').innerHTML='<div class="empty">Aucun ticket dans cette catégorie</div>'; return; }
+
+  document.getElementById('ticketList').innerHTML = sorted.map(t => {
+    const rc = {late:'rb-late',medium:'rb-medium',ok:'rb-ok',notyet:'rb-notyet'}[t.risk];
+    const rl = {late:'Tardif',medium:'Limite',ok:'Dans les temps',notyet:'Pas encore'}[t.risk];
+    const dc = t.risk==='late'?'dp-red':t.risk==='medium'?'dp-amber':'';
+    return `<div class="tcard ${t.risk}">
+      <div class="tcard-top">
+        <span class="tid">${t.id}</span>
+        <span class="ttitle" title="${t.title}">${t.title}</span>
+        <span class="rbadge ${rc}">${rl}</span>
+      </div>
+      <div class="tcard-meta">
+        <span>👤 ${t.assignee}</span>
+        ${t.arrivalDate?`<span>📅 ${fmtDate(t.arrivalDate.toISOString())}</span>`:''}
+        ${t.delay!==null?`<span>⏱ <strong>J+${t.delay}</strong></span>`:''}
+        <span>📌 ${t.status}</span>
+        ${(t.risk==='late'||t.risk==='medium')?`<span class="delay-pill ${dc}" style="margin-left:auto">+${(t.delay-seuil).toFixed(1)}j vs seuil</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function autoRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  if (isAutoRefresh) {
+    clearInterval(refreshTimer);
+    isAutoRefresh = false;
+    btn.textContent = '⟳ Auto-refresh';
+    btn.style.background = '';
+  } else {
+    isAutoRefresh = true;
+    btn.textContent = '⏹ Arrêter refresh';
+    btn.style.background = 'var(--green-bg)';
+    loadSprint();
+    refreshTimer = setInterval(loadSprint, 5 * 60 * 1000); // toutes les 5 min
+  }
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// Sauvegarder email dans localStorage pour confort
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('jira_email');
+  if (saved) document.getElementById('email').value = saved;
+});
+document.getElementById('email').addEventListener('change', e => {
+  localStorage.setItem('jira_email', e.target.value);
+});
+</script>
+</body>
+</html>
