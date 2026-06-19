@@ -288,12 +288,13 @@ async function loadSprint(){
   document.getElementById('progLabel').textContent='Chargement de la liste des tickets...';
 
   try{
-    // Récupérer toutes les pages de tickets (pagination)
+    // Récupérer TOUS les tickets du sprint via JQL (inclut les sous-tickets)
     let issues=[];
     let startAt=0;
     const pageSize=50;
+    const jql='sprint='+id+' ORDER BY created ASC';
     while(true){
-      const pageData=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:pageSize,startAt:startAt,fields:fields});
+      const pageData=await api('/rest/api/3/search',{jql,maxResults:pageSize,startAt:startAt,fields:fields});
       const page=pageData.issues||[];
       issues.push(...page);
       document.getElementById('progLabel').textContent='Chargement des tickets... ('+issues.length+'/'+(pageData.total||'?')+')';
