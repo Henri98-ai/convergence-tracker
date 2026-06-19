@@ -199,7 +199,7 @@ input[type=date]{padding:0 8px}
 <script>
 const JIRA='https://isagri.atlassian.net';
 const BOARD=127;
-const PROXY='https://corsproxy.io/?url=';
+const PROXY='https://api.allorigins.win/raw?url=';
 const US_TYPES=['user story'];
 const BUG_TYPES=['bug','bogue','défaut','incident','anomalie'];
 const TEAM_COLORS=['#1D5FA4','#2D6A2D','#B45309','#C8392B','#6B21A8','#0E7490','#92400E','#166534','#9D174D','#1E3A5F'];
@@ -244,7 +244,7 @@ async function api(path,params,retries=2){
 
 async function findTeamField(){
   try{
-    const fields=await api('/rest/api/3/field');
+    const fields=await api('/rest/api/2/field');
     const tf=fields.find(f=>f.name.toLowerCase()==='team'||f.name.toLowerCase()==='équipe'||f.name.toLowerCase()==='squad');
     return tf?tf.id:null;
   }catch{return null;}
@@ -303,10 +303,10 @@ async function loadSprint(){
     let issues=[];
     let startAt=0;
     const pageSize=50;
-    // Endpoint agile avec pagination complète
+    // Recherche JQL complète via api/2 (inclut sous-tickets)
     while(true){
-      const pageData=await api('/rest/agile/1.0/board/'+BOARD+'/issue',{
-        jql:'sprint='+id,
+      const pageData=await api('/rest/api/2/search',{
+        jql:'sprint='+id+' ORDER BY created ASC',
         maxResults:pageSize,
         startAt:startAt,
         fields:fields
@@ -326,7 +326,7 @@ async function loadSprint(){
 
     const enriched=await processInBatches(issues, async issue=>{
       try{
-        const cl=await api('/rest/api/3/issue/'+issue.key+'/changelog',{maxResults:100});
+        const cl=await api('/rest/api/2/issue/'+issue.key+'/changelog',{maxResults:100,startAt:0});
         const tr=[];
         for(const h of cl.values||[])
           for(const it of h.items||[])
