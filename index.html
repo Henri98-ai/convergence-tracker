@@ -192,7 +192,7 @@ input[type=date]{padding:0 8px}
 const JIRA='https://isagri.atlassian.net';
 const BOARD=127;
 const PROXY='https://corsproxy.io/?url=';
-const US_TYPES=['story','user story','us','histoire','fonctionnalité','feature'];
+const US_TYPES=['user story'];
 const BUG_TYPES=['bug','bogue','défaut','incident','anomalie'];
 const TEAM_COLORS=['#1D5FA4','#2D6A2D','#B45309','#C8392B','#6B21A8','#0E7490','#92400E','#166534','#9D174D','#1E3A5F'];
 let auth='',sprintStart=null,sprintEnd=null,allT=[],timer=null,isAR=false,curTab='arrived',curSort='team',teamColorMap={};
@@ -306,10 +306,10 @@ async function loadSprint(){
         const arr=tr.find(t=>t.to===col||t.to.toLowerCase().includes(colLower));
         const ad=arr?new Date(arr.date):null;
         const delay=ad&&sprintStart?Math.round((ad-sprintStart)/86400000*10)/10:null;
-        const typeName=(issue.fields.issuetype?.name||'').toLowerCase();
+        const typeName=(issue.fields.issuetype?.name||'').toLowerCase().trim();
         let typeCategory='other';
-        if(US_TYPES.some(t=>typeName.includes(t)))typeCategory='us';
-        else if(BUG_TYPES.some(t=>typeName.includes(t)))typeCategory='bug';
+        if(US_TYPES.some(t=>typeName===t))typeCategory='us';
+        else if(BUG_TYPES.some(t=>typeName===t||typeName.includes(t)))typeCategory='bug';
         let team='Sans équipe';
         if(teamFieldId&&issue.fields[teamFieldId]){
           const tf=issue.fields[teamFieldId];
