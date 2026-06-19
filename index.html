@@ -16,8 +16,7 @@ h1{font-size:17px;font-weight:600}
 .sub{font-size:12px;color:var(--text3);margin-top:1px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1.5rem;box-shadow:var(--sh)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
-.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 label{display:block;font-size:11px;font-weight:500;color:var(--text2);margin-bottom:4px;letter-spacing:.03em;text-transform:uppercase}
 input,select{width:100%;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--bg);color:var(--text);outline:none;font-family:inherit}
 input:focus,select:focus{border-color:var(--blue)}
@@ -38,59 +37,61 @@ input[type=date]{padding:0 8px}
 .sprint-row .f{flex:1;min-width:180px}
 .prog{height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
 .prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
-.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.5rem;box-shadow:var(--sh)}
-.filter-bar-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
-.filter-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
-.filter-row .f{flex:1;min-width:140px}
-.active-filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.filter-tag{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--blue-bg);color:var(--blue);border:1px solid #C8DCF2;display:flex;align-items:center;gap:6px}
-.filter-tag button{background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;line-height:1;padding:0}
 .sprint-name{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:2px}
 .sprint-sub{font-size:12px;color:var(--text3);margin-bottom:1.5rem}
-.alert{background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--r);padding:12px 14px;margin-bottom:1.5rem;font-size:13px;color:#7A1E14;line-height:1.55}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
 @media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}}
 .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
 .metric-l{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
 .metric-v{font-size:26px;font-weight:700;letter-spacing:-.03em}
 .metric-s{font-size:11px;color:var(--text3);margin-top:2px}
-.vr{color:var(--red)}.va{color:var(--amber)}.vg{color:var(--green)}
+.va{color:var(--amber)}
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.5rem;box-shadow:var(--sh)}
+.filter-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.filter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+@media(max-width:700px){.filter-grid{grid-template-columns:repeat(2,1fr)}}
+.active-filters{display:flex;gap:6px;flex-wrap:wrap;min-height:0}
+.ftag{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--blue-bg);color:var(--blue);border:1px solid #C8DCF2;display:flex;align-items:center;gap:6px}
+.ftag button{background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;line-height:1;padding:0}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1.5rem;box-shadow:var(--sh)}
 .chart-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem}
-.histo{display:flex;align-items:flex-end;gap:4px;height:90px}
-.hcol{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
-.hbar{width:100%;border-radius:3px 3px 0 0;min-height:2px}
-.hval{font-size:9px;font-weight:600;color:var(--text2)}
-.hlbl{font-size:9px;color:var(--text3)}
-.seuil-row{display:flex;align-items:center;gap:6px;margin-top:8px}
-.seuil-line{flex:1;height:1px;background:var(--red);opacity:.35}
-.seuil-tag{font-size:10px;color:var(--red);font-weight:500}
+.timeline-bars{display:flex;flex-direction:column;gap:5px}
+.tl-row{display:flex;align-items:center;gap:8px}
+.tl-id{font-size:10px;color:var(--blue);font-family:monospace;width:72px;flex-shrink:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-track{flex:1;height:14px;background:var(--bg);border-radius:3px;position:relative}
+.tl-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:10px;height:10px;border-radius:50%;border:2px solid white}
+.tl-date{font-size:9px;color:var(--text3);width:60px;flex-shrink:0}
+.tl-axis{display:flex;position:relative;height:16px;margin-bottom:2px;padding-left:80px;padding-right:68px}
+.axis-tick{position:absolute;font-size:9px;color:var(--text3);transform:translateX(-50%)}
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:1rem}
 .tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab.active{color:var(--text);border-bottom-color:var(--text)}
 .ticket-list{display:flex;flex-direction:column;gap:8px}
 .tcard{background:var(--surface);border:1px solid var(--border);border-left-width:3px;border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh)}
-.tcard.late{border-left-color:var(--red)}.tcard.medium{border-left-color:var(--amber)}.tcard.ok{border-left-color:var(--green)}.tcard.notyet{border-left-color:var(--border)}
+.tcard.arrived{border-left-color:var(--blue)}.tcard.notyet{border-left-color:var(--border)}
 .tt{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
 .tid{font-size:11px;font-weight:600;color:var(--blue);font-family:monospace;flex-shrink:0}
 .ttitle{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rbadge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;flex-shrink:0}
-.rl{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
-.rm{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b)}
-.ro{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
-.rn{background:var(--bg);color:var(--text3);border:1px solid var(--border)}
+.r-arr{background:var(--blue-bg);color:var(--blue);border:1px solid #C8DCF2}
+.r-not{background:var(--bg);color:var(--text3);border:1px solid var(--border)}
 .type-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;flex-shrink:0;background:#EEE;color:#555}
 .type-us{background:#E8F0FE;color:#1A56DB}
 .type-bug{background:var(--red-bg);color:var(--red)}
-.tm{display:flex;gap:12px;font-size:11px;color:var(--text3);flex-wrap:wrap;align-items:center}
-.dpill{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:auto}
-.dpr{background:var(--red-bg);color:var(--red)}.dpa{background:var(--amber-bg);color:var(--amber)}
-.legend{display:flex;gap:12px;font-size:11px;color:var(--text3);flex-wrap:wrap;margin-bottom:10px}
-.ldot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.team-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;flex-shrink:0;background:#F3E8FF;color:#6B21A8}
+.tm{display:flex;gap:10px;font-size:11px;color:var(--text3);flex-wrap:wrap;align-items:center}
+.day-pill{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:auto;background:var(--blue-bg);color:var(--blue)}
 .rfrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
 .rfinfo{font-size:11px;color:var(--text3)}
+.sort-row{display:flex;align-items:center;gap:6px}
+.sort-label{font-size:11px;color:var(--text3)}
+.sort-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text2)}
+.sort-btn.active{background:var(--text);color:white;border-color:var(--text)}
 .empty{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
 .lmsg{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
+.legend{display:flex;gap:12px;font-size:11px;color:var(--text3);flex-wrap:wrap;margin-top:10px}
+.ldot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.no-team{font-style:italic;color:var(--text3)}
 </style>
 </head>
 <body>
@@ -101,7 +102,6 @@ input[type=date]{padding:0 8px}
   <div><h1>Convergence Tracker</h1><div class="sub">Projet MP — isagri.atlassian.net</div></div>
 </header>
 
-<!-- CONFIG -->
 <div class="card">
   <div class="grid2">
     <div><label>Email Atlassian</label><input type="email" id="email" placeholder="prenom.nom@isagri.com"></div>
@@ -109,19 +109,13 @@ input[type=date]{padding:0 8px}
   </div>
   <div class="grid3">
     <div><label>Colonne "à tester"</label><input type="text" id="colTester" value="6 - A tester en dev"></div>
-    <div><label>Seuil tardif (jours)</label>
-      <select id="seuil">
-        <option value="3">J+3</option><option value="4">J+4</option>
-        <option value="5" selected>J+5</option><option value="6">J+6</option><option value="7">J+7</option>
-      </select>
-    </div>
+    <div></div>
     <div><label>&nbsp;</label><button class="btn btn-p" onclick="connect()" style="width:100%">Charger les sprints →</button></div>
   </div>
   <div class="info-box"><strong>ℹ️ Proxy CORS :</strong> Les appels Jira transitent par corsproxy.io. Votre token reste dans votre session locale.</div>
   <div class="row"><div class="status"><div class="dot" id="dot"></div><span id="stxt">Non connecté</span></div></div>
 </div>
 
-<!-- SPRINT SELECTOR -->
 <div class="card hidden" id="sprintBar">
   <div class="sprint-row">
     <div class="f"><label>Sprint à analyser</label><select id="sprintSel"></select></div>
@@ -131,16 +125,14 @@ input[type=date]{padding:0 8px}
   <div class="prog hidden" id="prog"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
 </div>
 
-<!-- RÉSULTATS -->
 <div class="hidden" id="main">
   <div class="sprint-name" id="sName"></div>
   <div class="sprint-sub" id="sSub"></div>
 
-  <!-- FILTRES ACTIFS -->
   <div class="filter-bar">
-    <div class="filter-bar-title">Filtres</div>
-    <div class="filter-row">
-      <div class="f">
+    <div class="filter-title">Filtres</div>
+    <div class="filter-grid">
+      <div>
         <label>Type de ticket</label>
         <select id="filterType" onchange="applyFilters()">
           <option value="all">Tous les types</option>
@@ -148,11 +140,17 @@ input[type=date]{padding:0 8px}
           <option value="bug">Bugs uniquement</option>
         </select>
       </div>
-      <div class="f">
+      <div>
+        <label>Équipe (Team)</label>
+        <select id="filterTeam" onchange="applyFilters()">
+          <option value="all">Toutes les équipes</option>
+        </select>
+      </div>
+      <div>
         <label>Arrivée en test après le</label>
         <input type="date" id="filterDate" onchange="applyFilters()">
       </div>
-      <div class="f">
+      <div>
         <label>Priorité</label>
         <select id="filterPriority" onchange="applyFilters()">
           <option value="all">Toutes les priorités</option>
@@ -162,31 +160,31 @@ input[type=date]{padding:0 8px}
           <option value="Faible">Faible</option>
         </select>
       </div>
-      <div class="f">
-        <label>&nbsp;</label>
-        <button class="btn btn-s" onclick="resetFilters()" style="width:100%">✕ Réinitialiser</button>
-      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+      <button class="btn btn-s" onclick="resetFilters()">✕ Réinitialiser les filtres</button>
     </div>
     <div class="active-filters" id="activeTags"></div>
   </div>
 
-  <div class="alert" id="alertTxt"></div>
   <div class="metrics" id="metrics"></div>
+
   <div class="chart-card">
-    <div class="chart-title">Distribution des délais d'arrivée en colonne "à tester"</div>
-    <div class="histo" id="histo"></div>
-    <div class="seuil-row"><div class="seuil-line"></div><div class="seuil-tag" id="seuilTag"></div><div class="seuil-line"></div></div>
+    <div class="chart-title">Chronologie des arrivées en "À tester en dev"</div>
+    <div id="timelineWrap"></div>
   </div>
+
   <div class="tabs">
-    <div class="tab active" onclick="switchTab(this,'late')">Tardifs <span id="lb"></span></div>
-    <div class="tab" onclick="switchTab(this,'all')">Tous les testés</div>
-    <div class="tab" onclick="switchTab(this,'notyet')">Pas encore à tester</div>
+    <div class="tab active" onclick="switchTab(this,'arrived')">Arrivés à tester <span id="lb1"></span></div>
+    <div class="tab" onclick="switchTab(this,'notyet')">Pas encore à tester <span id="lb2"></span></div>
   </div>
   <div class="rfrow">
-    <div class="legend">
-      <span><span class="ldot" style="background:var(--red)"></span>Tardif</span>
-      <span><span class="ldot" style="background:var(--amber)"></span>Limite</span>
-      <span><span class="ldot" style="background:var(--green)"></span>Dans les temps</span>
+    <div class="sort-row">
+      <span class="sort-label">Trier par :</span>
+      <button class="sort-btn active" onclick="setSort(this,'date')">Date d'arrivée</button>
+      <button class="sort-btn" onclick="setSort(this,'delay')">Délai (jours)</button>
+      <button class="sort-btn" onclick="setSort(this,'team')">Équipe</button>
+      <button class="sort-btn" onclick="setSort(this,'id')">ID</button>
     </div>
     <div class="rfinfo" id="rfInfo"></div>
   </div>
@@ -198,11 +196,11 @@ input[type=date]{padding:0 8px}
 const JIRA='https://isagri.atlassian.net';
 const BOARD=127;
 const PROXY='https://corsproxy.io/?url=';
-let auth='',sprintStart=null,allT=[],timer=null,isAR=false,curTab='late';
-
-// Types considérés comme User Stories (noms Jira courants)
-const US_TYPES=['story','user story','us','histoire','fonctionnalité','feature','epic'];
+const US_TYPES=['story','user story','us','histoire','fonctionnalité','feature'];
 const BUG_TYPES=['bug','bogue','défaut','incident','anomalie'];
+// Couleurs pour les équipes (cyclique)
+const TEAM_COLORS=['#1D5FA4','#2D6A2D','#B45309','#C8392B','#6B21A8','#0E7490','#92400E','#166534'];
+let auth='',sprintStart=null,sprintEnd=null,allT=[],timer=null,isAR=false,curTab='arrived',curSort='date',teamColorMap={};
 
 function show(id){document.getElementById(id).classList.remove('hidden');}
 function hide(id){document.getElementById(id).classList.add('hidden');}
@@ -216,6 +214,15 @@ async function api(path,params){
   return r.json();
 }
 
+// Chercher le champ Team dans les champs personnalisés
+async function findTeamField(){
+  try{
+    const fields=await api('/rest/api/3/field');
+    const tf=fields.find(f=>f.name.toLowerCase()==='team'||f.name.toLowerCase()==='équipe'||f.name.toLowerCase()==='squad');
+    return tf?tf.id:null;
+  }catch{return null;}
+}
+
 async function connect(){
   const em=document.getElementById('email').value.trim();
   const tk=document.getElementById('token').value.trim();
@@ -225,8 +232,7 @@ async function connect(){
   try{
     const d=await api('/rest/agile/1.0/board/'+BOARD+'/sprint',{state:'active,closed',maxResults:20});
     const sp=(d.values||[]).reverse();
-    const sel=document.getElementById('sprintSel');
-    sel.innerHTML=sp.map(s=>`<option value="${s.id}" data-start="${s.startDate||''}" data-end="${s.endDate||''}" data-name="${s.name}">${s.name} (${s.state})</option>`).join('');
+    document.getElementById('sprintSel').innerHTML=sp.map(s=>`<option value="${s.id}" data-start="${s.startDate||''}" data-end="${s.endDate||''}" data-name="${s.name}">${s.name} (${s.state})</option>`).join('');
     show('sprintBar');
     setStatus('ok','Connecté — '+sp.length+' sprints');
     localStorage.setItem('jira_email',em);
@@ -238,27 +244,31 @@ async function loadSprint(){
   const opt=sel.selectedOptions[0];
   const id=sel.value;
   sprintStart=opt.dataset.start?new Date(opt.dataset.start):null;
+  sprintEnd=opt.dataset.end?new Date(opt.dataset.end):null;
   const col=document.getElementById('colTester').value.trim();
-  const seuil=parseInt(document.getElementById('seuil').value);
 
   show('main');
   document.getElementById('sName').textContent=opt.dataset.name;
-  document.getElementById('sSub').textContent='Début : '+fd(opt.dataset.start)+' · Fin : '+fd(opt.dataset.end)+' · Colonne : "'+col+'" · Seuil : J+'+seuil;
-  document.getElementById('tList').innerHTML='<div class="lmsg">⏳ Chargement des tickets en cours...</div>';
+  document.getElementById('sSub').textContent='Début : '+fd(opt.dataset.start)+' · Fin : '+fd(opt.dataset.end)+' · Colonne : "'+col+'"';
+  document.getElementById('tList').innerHTML='<div class="lmsg">⏳ Chargement des tickets...</div>';
   document.getElementById('metrics').innerHTML='';
-  document.getElementById('alertTxt').textContent='';
-  document.getElementById('histo').innerHTML='';
-  // Réinitialiser les filtres à chaque nouveau sprint
+  document.getElementById('timelineWrap').innerHTML='';
   document.getElementById('filterDate').value='';
   document.getElementById('filterType').value='all';
   document.getElementById('filterPriority').value='all';
+  document.getElementById('filterTeam').innerHTML='<option value="all">Toutes les équipes</option>';
   document.getElementById('activeTags').innerHTML='';
   show('prog');
   document.getElementById('progFill').style.width='3%';
-  setStatus('loading','Chargement...');
+  setStatus('loading','Recherche du champ Team...');
 
+  // Trouver l'ID du champ Team
+  const teamFieldId=await findTeamField();
+  const fields='summary,status,priority,assignee,issuetype'+(teamFieldId?','+teamFieldId:'');
+
+  setStatus('loading','Chargement des tickets...');
   try{
-    const data=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:200,fields:'summary,status,priority,assignee,issuetype'});
+    const data=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:200,fields});
     const issues=data.issues||[];
     const total=issues.length;
     let done=0;
@@ -270,37 +280,50 @@ async function loadSprint(){
         const tr=[];
         for(const h of cl.values||[])
           for(const it of h.items||[])
-            if(it.field==='status')tr.push({from:it.fromString,to:it.toString,date:h.created});
+            if(it.field==='status')tr.push({to:it.toString,date:h.created});
         const arr=tr.find(t=>t.to===col||t.to.toLowerCase().includes(colLower));
         const ad=arr?new Date(arr.date):null;
         const delay=ad&&sprintStart?Math.round((ad-sprintStart)/86400000*10)/10:null;
-        const risk=delay===null?'notyet':delay<seuil?'ok':delay<=seuil+1?'medium':'late';
-        const issueTypeName=(issue.fields.issuetype?.name||'').toLowerCase();
+        const typeName=(issue.fields.issuetype?.name||'').toLowerCase();
         let typeCategory='other';
-        if(US_TYPES.some(t=>issueTypeName.includes(t)))typeCategory='us';
-        else if(BUG_TYPES.some(t=>issueTypeName.includes(t)))typeCategory='bug';
+        if(US_TYPES.some(t=>typeName.includes(t)))typeCategory='us';
+        else if(BUG_TYPES.some(t=>typeName.includes(t)))typeCategory='bug';
+
+        // Récupérer le champ Team (peut être dans différents formats)
+        let team='—';
+        if(teamFieldId&&issue.fields[teamFieldId]){
+          const tf=issue.fields[teamFieldId];
+          if(typeof tf==='string')team=tf;
+          else if(tf?.name)team=tf.name;
+          else if(tf?.value)team=tf.value;
+          else if(Array.isArray(tf)&&tf[0])team=tf[0].name||tf[0].value||tf[0];
+        }
+
         done++;
         document.getElementById('progFill').style.width=Math.round(done/total*100)+'%';
-        return{
-          id:issue.key,
-          title:issue.fields.summary,
-          status:issue.fields.status?.name||'?',
-          assignee:issue.fields.assignee?.displayName||'—',
-          priority:issue.fields.priority?.name||'—',
-          issueType:issue.fields.issuetype?.name||'?',
-          typeCategory,
-          ad,delay,risk
-        };
+        return{id:issue.key,title:issue.fields.summary,status:issue.fields.status?.name||'?',assignee:issue.fields.assignee?.displayName||'—',priority:issue.fields.priority?.name||'—',issueType:issue.fields.issuetype?.name||'?',typeCategory,team,ad,delay};
       }catch{
         done++;
-        return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',priority:'—',issueType:'?',typeCategory:'other',ad:null,delay:null,risk:'notyet'};
+        return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',priority:'—',issueType:'?',typeCategory:'other',team:'—',ad:null,delay:null};
       }
     }));
 
     allT=enriched;
+
+    // Construire la liste des équipes et attribuer des couleurs
+    const teams=[...new Set(enriched.map(t=>t.team).filter(t=>t&&t!=='—'))].sort();
+    teamColorMap={};
+    teams.forEach((t,i)=>teamColorMap[t]=TEAM_COLORS[i%TEAM_COLORS.length]);
+
+    // Peupler le filtre équipe
+    const teamSel=document.getElementById('filterTeam');
+    teamSel.innerHTML='<option value="all">Toutes les équipes ('+teams.length+')</option>'+
+      teams.map(t=>`<option value="${t}">${t}</option>`).join('');
+    if(!teams.length)teamSel.innerHTML='<option value="all">Aucune équipe détectée</option>';
+
     hide('prog');
     applyFilters();
-    setStatus('ok','À jour');
+    setStatus('ok','À jour'+(teamFieldId?'':' — champ Team non trouvé'));
     document.getElementById('rfInfo').textContent='Mis à jour : '+new Date().toLocaleTimeString('fr-FR');
   }catch(e){
     setStatus('err','Erreur : '+e.message);
@@ -309,136 +332,156 @@ async function loadSprint(){
   }
 }
 
-function applyFilters(){
-  if(!allT.length)return;
-  const seuil=parseInt(document.getElementById('seuil').value);
-  const col=document.getElementById('colTester').value.trim();
-  const filterType=document.getElementById('filterType').value;
-  const filterDateVal=document.getElementById('filterDate').value;
-  const filterPriority=document.getElementById('filterPriority').value;
-  const filterDate=filterDateVal?new Date(filterDateVal):null;
-
-  // Construire les tags actifs
-  const tags=[];
-  if(filterType==='us')tags.push({label:'Type : User Stories uniquement',key:'type'});
-  if(filterType==='bug')tags.push({label:'Type : Bugs uniquement',key:'type'});
-  if(filterDate)tags.push({label:'Arrivée après le '+fd(filterDateVal),key:'date'});
-  if(filterPriority!=='all')tags.push({label:'Priorité : '+filterPriority,key:'priority'});
-  document.getElementById('activeTags').innerHTML=tags.map(t=>
-    `<div class="filter-tag">${t.label}<button onclick="clearFilter('${t.key}')">✕</button></div>`
-  ).join('');
-
-  let filtered=allT.filter(t=>{
-    if(filterType==='us'&&t.typeCategory!=='us')return false;
-    if(filterType==='bug'&&t.typeCategory!=='bug')return false;
-    if(filterDate&&t.ad&&t.ad<filterDate)return false;
-    if(filterDate&&!t.ad)return false; // si filtre date actif, exclure les non-testés
-    if(filterPriority!=='all'&&t.priority!==filterPriority)return false;
+function getFiltered(){
+  const ft=document.getElementById('filterType').value;
+  const fteam=document.getElementById('filterTeam').value;
+  const fdv=document.getElementById('filterDate').value;
+  const fp=document.getElementById('filterPriority').value;
+  const fd2=fdv?new Date(fdv):null;
+  return allT.filter(t=>{
+    if(ft==='us'&&t.typeCategory!=='us')return false;
+    if(ft==='bug'&&t.typeCategory!=='bug')return false;
+    if(fteam!=='all'&&t.team!==fteam)return false;
+    if(fd2&&(!t.ad||t.ad<fd2))return false;
+    if(fp!=='all'&&t.priority!==fp)return false;
     return true;
   });
+}
 
-  render(filtered,seuil,col);
+function applyFilters(){
+  if(!allT.length)return;
+  const ft=document.getElementById('filterType').value;
+  const fteam=document.getElementById('filterTeam').value;
+  const fdv=document.getElementById('filterDate').value;
+  const fp=document.getElementById('filterPriority').value;
+  const tags=[];
+  if(ft==='us')tags.push({label:'User Stories uniquement',key:'type'});
+  if(ft==='bug')tags.push({label:'Bugs uniquement',key:'type'});
+  if(fteam!=='all')tags.push({label:'Équipe : '+fteam,key:'team'});
+  if(fdv)tags.push({label:'Arrivée après le '+fd(fdv),key:'date'});
+  if(fp!=='all')tags.push({label:'Priorité : '+fp,key:'priority'});
+  document.getElementById('activeTags').innerHTML=tags.map(t=>
+    `<div class="ftag">${t.label}<button onclick="clearFilter('${t.key}')">✕</button></div>`
+  ).join('');
+  render(getFiltered());
 }
 
 function clearFilter(key){
   if(key==='type')document.getElementById('filterType').value='all';
+  if(key==='team')document.getElementById('filterTeam').value='all';
   if(key==='date')document.getElementById('filterDate').value='';
   if(key==='priority')document.getElementById('filterPriority').value='all';
   applyFilters();
 }
-
 function resetFilters(){
   document.getElementById('filterType').value='all';
+  document.getElementById('filterTeam').value='all';
   document.getElementById('filterDate').value='';
   document.getElementById('filterPriority').value='all';
   applyFilters();
 }
 
-function render(e,seuil,col){
-  const late=e.filter(t=>t.risk==='late');
-  const arr=e.filter(t=>t.delay!==null);
-  const notyet=e.filter(t=>t.risk==='notyet');
-  const avg=arr.length?(arr.reduce((s,t)=>s+t.delay,0)/arr.length).toFixed(1):'—';
-
-  const filterInfo=document.getElementById('filterType').value!=='all'||document.getElementById('filterDate').value||document.getElementById('filterPriority').value!=='all'
-    ?' (sur la sélection filtrée)':'';
-
-  document.getElementById('alertTxt').innerHTML=
-    '<strong>⚠️ '+late.length+' tickets sur '+arr.length+' sont arrivés en "'+col+
-    '" après J+'+seuil+' ('+Math.round(late.length/Math.max(arr.length,1)*100)+'%)'+filterInfo+'.</strong> '+
-    'Délai moyen : J+'+avg+'. '+notyet.length+' tickets pas encore prêts à tester. '+
-    'Ces données prouvent que les US arrivent trop tard pour permettre des tests métier en début de convergence.';
+function render(e){
+  const arrived=e.filter(t=>t.ad!==null);
+  const notyet=e.filter(t=>t.ad===null);
+  const avg=arrived.length?(arrived.reduce((s,t)=>s+t.delay,0)/arrived.length).toFixed(1):'—';
+  const last=arrived.length?new Date(Math.max(...arrived.map(t=>t.ad.getTime()))):null;
 
   document.getElementById('metrics').innerHTML=
-    '<div class="metric"><div class="metric-l">Tickets</div><div class="metric-v">'+e.length+'</div><div class="metric-s">sélection actuelle</div></div>'+
-    '<div class="metric"><div class="metric-l">Tardifs</div><div class="metric-v vr">'+late.length+'</div><div class="metric-s">après J+'+seuil+'</div></div>'+
-    '<div class="metric"><div class="metric-l">Délai moyen</div><div class="metric-v va">J+'+avg+'</div><div class="metric-s">seuil : J+'+seuil+'</div></div>'+
-    '<div class="metric"><div class="metric-l">Non prêts</div><div class="metric-v">'+notyet.length+'</div><div class="metric-s">pas encore testables</div></div>';
+    '<div class="metric"><div class="metric-l">Tickets sélectionnés</div><div class="metric-v">'+e.length+'</div><div class="metric-s">total</div></div>'+
+    '<div class="metric"><div class="metric-l">Arrivés à tester</div><div class="metric-v" style="color:var(--blue)">'+arrived.length+'</div><div class="metric-s">ont atteint la colonne</div></div>'+
+    '<div class="metric"><div class="metric-l">Délai moyen d\'arrivée</div><div class="metric-v va">J+'+avg+'</div><div class="metric-s">'+(last?'dernier : '+fdShort(last.toISOString()):'')+'</div></div>';
 
-  const bk={};
-  arr.forEach(t=>{const b=Math.floor(t.delay);bk[b]=(bk[b]||0)+1;});
-  const maxB=arr.length?Math.max(...Object.keys(bk).map(Number)):0;
-  const maxV=arr.length?Math.max(...Object.values(bk)):1;
-  let h='';
-  for(let d=0;d<=maxB;d++){
-    const c=bk[d]||0;
-    const ht=c>0?Math.max(6,Math.round(c/maxV*75)):3;
-    const color=d<seuil?'var(--green)':d<=seuil+1?'var(--amber)':'var(--red)';
-    h+=`<div class="hcol"><div class="hval">${c>0?c:''}</div><div class="hbar" style="height:${ht}px;background:${color}"></div><div class="hlbl">J+${d}</div></div>`;
+  renderTimeline(arrived);
+  document.getElementById('lb1').textContent='('+arrived.length+')';
+  document.getElementById('lb2').textContent='('+notyet.length+')';
+  renderTab(curTab,e);
+}
+
+function renderTimeline(arrived){
+  if(!arrived.length||!sprintStart){document.getElementById('timelineWrap').innerHTML='<div style="padding:1rem;color:var(--text3);font-size:13px;text-align:center">Aucune donnée à afficher</div>';return;}
+  const sprintDays=sprintEnd?Math.round((sprintEnd-sprintStart)/86400000):30;
+  const sorted=[...arrived].sort((a,b)=>a.ad-b.ad);
+  const ticks=[0,Math.round(sprintDays*0.25),Math.round(sprintDays*0.5),Math.round(sprintDays*0.75),sprintDays];
+
+  let axisHtml='<div class="tl-axis">';
+  ticks.forEach(d=>axisHtml+=`<div class="axis-tick" style="left:calc(80px + ${d/sprintDays*100}% * ((100% - 148px)/100%))">${d===0?'Début':d===sprintDays?'Fin':'J+'+d}</div>`);
+  axisHtml+='</div><div style="margin-left:80px;margin-right:68px;border-top:1px solid var(--border);margin-bottom:8px"></div>';
+
+  const fteam=document.getElementById('filterTeam').value;
+  let barsHtml='<div class="timeline-bars">';
+  sorted.forEach(t=>{
+    const pct=Math.min(99,Math.max(1,Math.round(t.delay/sprintDays*100)));
+    const color=fteam!=='all'||!teamColorMap[t.team]?
+      (t.typeCategory==='us'?'var(--blue)':t.typeCategory==='bug'?'var(--red)':'var(--text3)'):
+      (teamColorMap[t.team]||'var(--text3)');
+    barsHtml+=`<div class="tl-row" title="${t.id} — ${t.title} — J+${t.delay} (${t.team})">
+      <div class="tl-id">${t.id}</div>
+      <div class="tl-track" style="background:linear-gradient(to right,rgba(29,95,164,.08) ${pct}%,var(--bg) ${pct}%)">
+        <div class="tl-dot" style="left:${pct}%;background:${color}"></div>
+      </div>
+      <div class="tl-date">${fdShort(t.ad.toISOString())} (J+${t.delay})</div>
+    </div>`;
+  });
+  barsHtml+='</div>';
+
+  // Légende dynamique selon le mode
+  let legendHtml='<div class="legend">';
+  if(fteam!=='all'){
+    legendHtml+=`<span><span class="ldot" style="background:${teamColorMap[fteam]||'var(--blue)'}"></span>${fteam}</span>`;
+  } else if(Object.keys(teamColorMap).length>0){
+    Object.entries(teamColorMap).forEach(([name,color])=>{
+      legendHtml+=`<span><span class="ldot" style="background:${color}"></span>${name}</span>`;
+    });
+  } else {
+    legendHtml+=`<span><span class="ldot" style="background:var(--blue)"></span>User Story</span>`;
+    legendHtml+=`<span><span class="ldot" style="background:var(--red)"></span>Bug</span>`;
+    legendHtml+=`<span><span class="ldot" style="background:var(--text3)"></span>Autre</span>`;
   }
-  document.getElementById('histo').innerHTML=h;
-  document.getElementById('seuilTag').textContent='Seuil J+'+seuil;
-  document.getElementById('lb').textContent='('+late.length+')';
-  renderTab(curTab,e,seuil);
+  legendHtml+='</div>';
+
+  document.getElementById('timelineWrap').innerHTML=axisHtml+barsHtml+legendHtml;
 }
 
 function switchTab(el,tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  curTab=tab;
-  const seuil=parseInt(document.getElementById('seuil').value);
-  // Récupérer les données filtrées courantes
-  const filterType=document.getElementById('filterType').value;
-  const filterDateVal=document.getElementById('filterDate').value;
-  const filterPriority=document.getElementById('filterPriority').value;
-  const filterDate=filterDateVal?new Date(filterDateVal):null;
-  let filtered=allT.filter(t=>{
-    if(filterType==='us'&&t.typeCategory!=='us')return false;
-    if(filterType==='bug'&&t.typeCategory!=='bug')return false;
-    if(filterDate&&t.ad&&t.ad<filterDate)return false;
-    if(filterDate&&!t.ad)return false;
-    if(filterPriority!=='all'&&t.priority!==filterPriority)return false;
-    return true;
-  });
-  renderTab(tab,filtered,seuil);
+  el.classList.add('active');curTab=tab;
+  renderTab(tab,getFiltered());
+}
+function setSort(el,sort){
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');curSort=sort;
+  renderTab(curTab,getFiltered());
 }
 
-function renderTab(tab,e,seuil){
-  const list=tab==='late'?e.filter(t=>t.risk==='late'||t.risk==='medium'):
-             tab==='all'?e.filter(t=>t.delay!==null):
-             e.filter(t=>t.risk==='notyet');
-  const s=[...list].sort((a,b)=>(b.delay??999)-(a.delay??999));
-  if(!s.length){document.getElementById('tList').innerHTML='<div class="empty">Aucun ticket dans cette catégorie</div>';return;}
+function renderTab(tab,e){
+  const list=tab==='arrived'?e.filter(t=>t.ad!==null):e.filter(t=>t.ad===null);
+  let s=[...list];
+  if(curSort==='date')s.sort((a,b)=>(b.ad?.getTime()??0)-(a.ad?.getTime()??0));
+  else if(curSort==='delay')s.sort((a,b)=>(b.delay??-1)-(a.delay??-1));
+  else if(curSort==='team')s.sort((a,b)=>(a.team||'').localeCompare(b.team||''));
+  else s.sort((a,b)=>a.id.localeCompare(b.id));
 
+  if(!s.length){document.getElementById('tList').innerHTML='<div class="empty">Aucun ticket dans cette catégorie</div>';return;}
+  const teamColor=t=>teamColorMap[t.team]||'#888';
   document.getElementById('tList').innerHTML=s.map(t=>{
-    const rc={late:'rl',medium:'rm',ok:'ro',notyet:'rn'}[t.risk];
-    const rl={late:'Tardif',medium:'Limite',ok:'Dans les temps',notyet:'Pas encore'}[t.risk];
-    const dc=t.risk==='late'?'dpr':t.risk==='medium'?'dpa':'';
+    const arrived=t.ad!==null;
     const typeCls=t.typeCategory==='us'?'type-us':t.typeCategory==='bug'?'type-bug':'';
-    return`<div class="tcard ${t.risk}">
+    const hasTeam=t.team&&t.team!=='—';
+    return`<div class="tcard ${arrived?'arrived':'notyet'}">
       <div class="tt">
         <span class="tid">${t.id}</span>
         <span class="type-badge ${typeCls}">${t.issueType}</span>
+        ${hasTeam?`<span class="team-badge" style="background:${teamColor(t)}22;color:${teamColor(t)};border:1px solid ${teamColor(t)}44">${t.team}</span>`:''}
         <span class="ttitle" title="${t.title}">${t.title}</span>
-        <span class="rbadge ${rc}">${rl}</span>
+        <span class="rbadge ${arrived?'r-arr':'r-not'}">${arrived?'Arrivé à tester':'Pas encore prêt'}</span>
       </div>
       <div class="tm">
         <span>👤 ${t.assignee}</span>
-        ${t.ad?`<span>📅 ${fd(t.ad.toISOString())}</span>`:''}
-        ${t.delay!==null?`<span>⏱ <strong>J+${t.delay}</strong></span>`:''}
+        ${t.ad?`<span>📅 <strong>${fd(t.ad.toISOString())}</strong></span>`:'<span>📅 Pas encore à tester</span>'}
+        ${t.delay!==null?`<span class="day-pill">J+${t.delay}</span>`:''}
         <span>📌 ${t.status}</span>
         <span>🏷 ${t.priority}</span>
-        ${(t.risk==='late'||t.risk==='medium')?`<span class="dpill ${dc}" style="margin-left:auto">+${(t.delay-seuil).toFixed(1)}j vs seuil</span>`:''}
       </div>
     </div>`;
   }).join('');
@@ -450,15 +493,10 @@ function toggleAR(){
   else{isAR=true;btn.textContent='⏹ Arrêter';btn.style.background='var(--green-bg)';loadSprint();timer=setInterval(loadSprint,5*60*1000);}
 }
 
-function fd(iso){
-  if(!iso)return'—';
-  return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
-}
+function fd(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});}
+function fdShort(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});}
 
-window.addEventListener('load',()=>{
-  const s=localStorage.getItem('jira_email');
-  if(s)document.getElementById('email').value=s;
-});
+window.addEventListener('load',()=>{const s=localStorage.getItem('jira_email');if(s)document.getElementById('email').value=s;});
 </script>
 </body>
 </html>
