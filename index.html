@@ -35,8 +35,10 @@ input[type=date]{padding:0 8px}
 .hidden{display:none !important}
 .sprint-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
 .sprint-row .f{flex:1;min-width:180px}
-.prog{height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
-.prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+.prog-wrap{margin-top:10px}
+.prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .2s}
+.prog-label{font-size:11px;color:var(--text3);margin-top:4px;text-align:center}
 .sprint-name{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:2px}
 .sprint-sub{font-size:12px;color:var(--text3);margin-bottom:1.5rem}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
@@ -57,7 +59,6 @@ input[type=date]{padding:0 8px}
 .tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab.active{color:var(--text);border-bottom-color:var(--text)}
 .ticket-list{display:flex;flex-direction:column;gap:8px}
-/* Séparateur de groupe équipe */
 .team-separator{padding:6px 0 4px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);margin-bottom:4px;display:flex;align-items:center;gap:8px}
 .team-sep-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .team-sep-count{font-size:10px;font-weight:400;color:var(--text3);margin-left:auto}
@@ -99,10 +100,16 @@ input[type=date]{padding:0 8px}
   </div>
   <div class="grid3">
     <div><label>Colonne "à tester"</label><input type="text" id="colTester" value="6 - A tester en dev"></div>
-    <div></div>
+    <div><label>Requêtes simultanées</label>
+      <select id="batchSize">
+        <option value="3">3 (réseau lent)</option>
+        <option value="5" selected>5 (recommandé)</option>
+        <option value="8">8 (rapide)</option>
+      </select>
+    </div>
     <div><label>&nbsp;</label><button class="btn btn-p" onclick="connect()" style="width:100%">Charger les sprints →</button></div>
   </div>
-  <div class="info-box"><strong>ℹ️ Proxy CORS :</strong> Les appels Jira transitent par corsproxy.io. Votre token reste dans votre session locale.</div>
+  <div class="info-box"><strong>ℹ️ Proxy CORS :</strong> Les appels Jira transitent par corsproxy.io par petits groupes pour éviter le rate limiting. Votre token reste en local.</div>
   <div class="row"><div class="status"><div class="dot" id="dot"></div><span id="stxt">Non connecté</span></div></div>
 </div>
 
@@ -112,7 +119,10 @@ input[type=date]{padding:0 8px}
     <div><label>&nbsp;</label><button class="btn btn-p" onclick="loadSprint()">Analyser →</button></div>
     <div><label>&nbsp;</label><button class="btn btn-s" onclick="toggleAR()" id="arBtn">⟳ Auto-refresh (5 min)</button></div>
   </div>
-  <div class="prog hidden" id="prog"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-wrap hidden" id="progWrap">
+    <div class="prog"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-label" id="progLabel">Chargement...</div>
+  </div>
 </div>
 
 <div class="hidden" id="main">
@@ -190,13 +200,38 @@ let auth='',sprintStart=null,sprintEnd=null,allT=[],timer=null,isAR=false,curTab
 function show(id){document.getElementById(id).classList.remove('hidden');}
 function hide(id){document.getElementById(id).classList.add('hidden');}
 function setStatus(s,m){document.getElementById('dot').className='dot '+(s||'');document.getElementById('stxt').textContent=m;}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
-async function api(path,params){
+// Traitement par lots pour éviter le 429
+async function processInBatches(items, fn, batchSize=5, delayMs=300){
+  const results=[];
+  for(let i=0;i<items.length;i+=batchSize){
+    const batch=items.slice(i,i+batchSize);
+    const batchResults=await Promise.all(batch.map(fn));
+    results.push(...batchResults);
+    if(i+batchSize<items.length) await sleep(delayMs);
+  }
+  return results;
+}
+
+async function api(path,params,retries=2){
   let url=JIRA+path;
   if(params)url+='?'+new URLSearchParams(params);
-  const r=await fetch(PROXY+encodeURIComponent(url),{headers:{'Authorization':auth,'Accept':'application/json','x-requested-with':'XMLHttpRequest'}});
-  if(!r.ok)throw new Error(r.status+' '+r.statusText);
-  return r.json();
+  for(let attempt=0;attempt<=retries;attempt++){
+    try{
+      const r=await fetch(PROXY+encodeURIComponent(url),{headers:{'Authorization':auth,'Accept':'application/json','x-requested-with':'XMLHttpRequest'}});
+      if(r.status===429){
+        // Rate limited — attendre et réessayer
+        await sleep(1500*(attempt+1));
+        continue;
+      }
+      if(!r.ok)throw new Error(r.status+' '+r.statusText);
+      return await r.json();
+    }catch(e){
+      if(attempt===retries)throw e;
+      await sleep(800);
+    }
+  }
 }
 
 async function findTeamField(){
@@ -230,24 +265,27 @@ async function loadSprint(){
   sprintStart=opt.dataset.start?new Date(opt.dataset.start):null;
   sprintEnd=opt.dataset.end?new Date(opt.dataset.end):null;
   const col=document.getElementById('colTester').value.trim();
+  const batchSize=parseInt(document.getElementById('batchSize').value);
 
   show('main');
   document.getElementById('sName').textContent=opt.dataset.name;
   document.getElementById('sSub').textContent='Début : '+fd(opt.dataset.start)+' · Fin : '+fd(opt.dataset.end)+' · Colonne : "'+col+'"';
-  document.getElementById('tList').innerHTML='<div class="lmsg">⏳ Chargement des tickets...</div>';
+  document.getElementById('tList').innerHTML='<div class="lmsg">⏳ Initialisation...</div>';
   document.getElementById('metrics').innerHTML='';
   document.getElementById('filterDate').value='';
   document.getElementById('filterType').value='all';
   document.getElementById('filterPriority').value='all';
   document.getElementById('filterTeam').innerHTML='<option value="all">Toutes les équipes</option>';
   document.getElementById('activeTags').innerHTML='';
-  show('prog');
-  document.getElementById('progFill').style.width='3%';
-  setStatus('loading','Recherche du champ Team...');
+  show('progWrap');
+  document.getElementById('progFill').style.width='2%';
+  document.getElementById('progLabel').textContent='Recherche du champ Team...';
+  setStatus('loading','Chargement...');
 
   const teamFieldId=await findTeamField();
   const fields='summary,status,priority,assignee,issuetype'+(teamFieldId?','+teamFieldId:'');
-  setStatus('loading','Chargement des tickets...');
+
+  document.getElementById('progLabel').textContent='Chargement de la liste des tickets...';
 
   try{
     const data=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:200,fields});
@@ -256,7 +294,9 @@ async function loadSprint(){
     let done=0;
     const colLower=col.toLowerCase().replace(/^\d+ - /,'');
 
-    const enriched=await Promise.all(issues.map(async issue=>{
+    document.getElementById('progLabel').textContent='Analyse des transitions (0/'+total+')...';
+
+    const enriched=await processInBatches(issues, async issue=>{
       try{
         const cl=await api('/rest/api/3/issue/'+issue.key+'/changelog',{maxResults:100});
         const tr=[];
@@ -279,13 +319,15 @@ async function loadSprint(){
           else if(Array.isArray(tf)&&tf[0])team=tf[0].name||tf[0].value||String(tf[0]);
         }
         done++;
-        document.getElementById('progFill').style.width=Math.round(done/total*100)+'%';
+        const pct=Math.round(done/total*100);
+        document.getElementById('progFill').style.width=pct+'%';
+        document.getElementById('progLabel').textContent='Analyse des transitions ('+done+'/'+total+')...';
         return{id:issue.key,title:issue.fields.summary,status:issue.fields.status?.name||'?',assignee:issue.fields.assignee?.displayName||'—',priority:issue.fields.priority?.name||'—',issueType:issue.fields.issuetype?.name||'?',typeCategory,team,ad,delay};
       }catch{
         done++;
         return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',priority:'—',issueType:'?',typeCategory:'other',team:'Sans équipe',ad:null,delay:null};
       }
-    }));
+    }, batchSize, 300);
 
     allT=enriched;
     const teams=[...new Set(enriched.map(t=>t.team))].sort();
@@ -297,13 +339,13 @@ async function loadSprint(){
     teamSel.innerHTML='<option value="all">Toutes les équipes ('+teams.filter(t=>t!=='Sans équipe').length+')</option>'+
       teams.map(t=>`<option value="${t}">${t}</option>`).join('');
 
-    hide('prog');
+    hide('progWrap');
     applyFilters();
-    setStatus('ok','À jour'+(teamFieldId?'':' — champ Team non trouvé, vérifiez le nom'));
+    setStatus('ok','À jour'+(teamFieldId?'':' — champ Team non trouvé'));
     document.getElementById('rfInfo').textContent='Mis à jour : '+new Date().toLocaleTimeString('fr-FR');
   }catch(e){
     setStatus('err','Erreur : '+e.message);
-    hide('prog');
+    hide('progWrap');
     document.getElementById('tList').innerHTML='<div class="empty">❌ '+e.message+'</div>';
   }
 }
@@ -373,13 +415,11 @@ function render(e){
 
 function switchTab(el,tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');curTab=tab;
-  renderTab(tab,getFiltered());
+  el.classList.add('active');curTab=tab;renderTab(tab,getFiltered());
 }
 function setSort(el,sort){
   document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');curSort=sort;
-  renderTab(curTab,getFiltered());
+  el.classList.add('active');curSort=sort;renderTab(curTab,getFiltered());
 }
 
 function sortList(list){
@@ -395,28 +435,18 @@ function renderTab(tab,e){
   const list=tab==='arrived'?e.filter(t=>t.ad!==null):e.filter(t=>t.ad===null);
   const sorted=sortList(list);
   if(!sorted.length){document.getElementById('tList').innerHTML='<div class="empty">Aucun ticket dans cette catégorie</div>';return;}
-
   let html='';
   if(curSort==='team'){
-    // Regrouper par équipe avec séparateurs
     const groups={};
-    sorted.forEach(t=>{
-      if(!groups[t.team])groups[t.team]=[];
-      groups[t.team].push(t);
-    });
+    sorted.forEach(t=>{if(!groups[t.team])groups[t.team]=[];groups[t.team].push(t);});
     Object.entries(groups).forEach(([team,tickets])=>{
       const color=teamColorMap[team]||'#9A9790';
-      html+=`<div class="team-separator">
-        <div class="team-sep-dot" style="background:${color}"></div>
-        ${team}
-        <span class="team-sep-count">${tickets.length} ticket${tickets.length>1?'s':''}</span>
-      </div>`;
-      tickets.forEach(t=>{ html+=cardHtml(t); });
+      html+=`<div class="team-separator"><div class="team-sep-dot" style="background:${color}"></div>${team}<span class="team-sep-count">${tickets.length} ticket${tickets.length>1?'s':''}</span></div>`;
+      tickets.forEach(t=>{html+=cardHtml(t);});
     });
-  } else {
-    sorted.forEach(t=>{ html+=cardHtml(t); });
+  }else{
+    sorted.forEach(t=>{html+=cardHtml(t);});
   }
-
   document.getElementById('tList').innerHTML=html;
 }
 
@@ -432,7 +462,7 @@ function cardHtml(t){
       <span class="rbadge ${arrived?'r-arr':'r-not'}">${arrived?'Arrivé à tester':'Pas encore prêt'}</span>
     </div>
     <div class="tm">
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>${t.team}</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:${color};display:inline-block"></span>${t.team}</span>
       <span>👤 ${t.assignee}</span>
       ${t.ad?`<span>📅 <strong>${fd(t.ad.toISOString())}</strong></span>`:'<span>📅 Pas encore à tester</span>'}
       ${t.delay!==null?`<span class="day-pill">J+${t.delay}</span>`:''}
