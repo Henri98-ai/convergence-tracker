@@ -31,12 +31,11 @@ input[type=password]{font-family:monospace;letter-spacing:.05em}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0}
 .dot.ok{background:var(--green)}.dot.err{background:var(--red)}.dot.loading{background:var(--amber);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-#sprintBar{display:none}
+.hidden{display:none !important}
 .sprint-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
 .sprint-row .f{flex:1;min-width:180px}
-.prog{height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden;display:none}
+.prog{height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
 .prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
-#main{display:none}
 .sprint-name{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:2px}
 .sprint-sub{font-size:12px;color:var(--text3);margin-bottom:1.5rem}
 .alert{background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--r);padding:12px 14px;margin-bottom:1.5rem;font-size:13px;color:#7A1E14;line-height:1.55}
@@ -84,11 +83,13 @@ input[type=password]{font-family:monospace;letter-spacing:.05em}
 </head>
 <body>
 <div class="page">
+
 <header>
   <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
   <div><h1>Convergence Tracker</h1><div class="sub">Projet MP — isagri.atlassian.net</div></div>
 </header>
 
+<!-- CONFIG -->
 <div class="card">
   <div class="grid2">
     <div><label>Email Atlassian</label><input type="email" id="email" placeholder="prenom.nom@isagri.com"></div>
@@ -108,16 +109,18 @@ input[type=password]{font-family:monospace;letter-spacing:.05em}
   <div class="row"><div class="status"><div class="dot" id="dot"></div><span id="stxt">Non connecté</span></div></div>
 </div>
 
-<div class="card" id="sprintBar">
+<!-- SPRINT SELECTOR — toujours dans le DOM, caché via classe -->
+<div class="card hidden" id="sprintBar">
   <div class="sprint-row">
     <div class="f"><label>Sprint à analyser</label><select id="sprintSel"></select></div>
     <div><label>&nbsp;</label><button class="btn btn-p" onclick="loadSprint()">Analyser →</button></div>
     <div><label>&nbsp;</label><button class="btn btn-s" onclick="toggleAR()" id="arBtn">⟳ Auto-refresh (5 min)</button></div>
   </div>
-  <div class="prog" id="prog"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog hidden" id="prog"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
 </div>
 
-<div id="main">
+<!-- RÉSULTATS -->
+<div class="hidden" id="main">
   <div class="sprint-name" id="sName"></div>
   <div class="sprint-sub" id="sSub"></div>
   <div class="alert" id="alertTxt"></div>
@@ -142,13 +145,16 @@ input[type=password]{font-family:monospace;letter-spacing:.05em}
   </div>
   <div class="ticket-list" id="tList"></div>
 </div>
-</div>
 
+</div>
 <script>
 const JIRA='https://isagri.atlassian.net';
 const BOARD=127;
 const PROXY='https://corsproxy.io/?url=';
 let auth='',sprintStart=null,allT=[],timer=null,isAR=false,curTab='late';
+
+function show(id){document.getElementById(id).classList.remove('hidden');}
+function hide(id){document.getElementById(id).classList.add('hidden');}
 
 function setStatus(s,m){
   document.getElementById('dot').className='dot '+(s||'');
@@ -158,7 +164,9 @@ function setStatus(s,m){
 async function api(path,params){
   let url=JIRA+path;
   if(params)url+='?'+new URLSearchParams(params);
-  const r=await fetch(PROXY+encodeURIComponent(url),{headers:{'Authorization':auth,'Accept':'application/json','x-requested-with':'XMLHttpRequest'}});
+  const r=await fetch(PROXY+encodeURIComponent(url),{
+    headers:{'Authorization':auth,'Accept':'application/json','x-requested-with':'XMLHttpRequest'}
+  });
   if(!r.ok)throw new Error(r.status+' '+r.statusText);
   return r.json();
 }
@@ -174,7 +182,7 @@ async function connect(){
     const sp=(d.values||[]).reverse();
     const sel=document.getElementById('sprintSel');
     sel.innerHTML=sp.map(s=>`<option value="${s.id}" data-start="${s.startDate||''}" data-end="${s.endDate||''}" data-name="${s.name}">${s.name} (${s.state})</option>`).join('');
-    document.getElementById('sprintBar').style.display='';
+    show('sprintBar');
     setStatus('ok','Connecté — '+sp.length+' sprints');
     localStorage.setItem('jira_email',em);
   }catch(e){setStatus('err','Erreur : '+e.message);}
@@ -187,27 +195,32 @@ async function loadSprint(){
   sprintStart=opt.dataset.start?new Date(opt.dataset.start):null;
   const col=document.getElementById('colTester').value.trim();
   const seuil=parseInt(document.getElementById('seuil').value);
-  document.getElementById('main').style.display='';
+
+  show('main');
   document.getElementById('sName').textContent=opt.dataset.name;
   document.getElementById('sSub').textContent='Début : '+fd(opt.dataset.start)+' · Fin : '+fd(opt.dataset.end)+' · Colonne : "'+col+'" · Seuil : J+'+seuil;
-  document.getElementById('tList').innerHTML='<div class="lmsg">⏳ Chargement des tickets...</div>';
+  document.getElementById('tList').innerHTML='<div class="lmsg">⏳ Chargement des tickets en cours...</div>';
   document.getElementById('metrics').innerHTML='';
   document.getElementById('alertTxt').textContent='';
   document.getElementById('histo').innerHTML='';
-  document.getElementById('prog').style.display='';
-  document.getElementById('progFill').style.width='5%';
+  show('prog');
+  document.getElementById('progFill').style.width='3%';
   setStatus('loading','Chargement...');
+
   try{
     const data=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:200,fields:'summary,status,priority,assignee'});
     const issues=data.issues||[];
     const total=issues.length;
     let done=0;
     const colLower=col.toLowerCase().replace(/^\d+ - /,'');
+
     const enriched=await Promise.all(issues.map(async issue=>{
       try{
         const cl=await api('/rest/api/3/issue/'+issue.key+'/changelog',{maxResults:100});
         const tr=[];
-        for(const h of cl.values||[])for(const it of h.items||[])if(it.field==='status')tr.push({from:it.fromString,to:it.toString,date:h.created});
+        for(const h of cl.values||[])
+          for(const it of h.items||[])
+            if(it.field==='status')tr.push({from:it.fromString,to:it.toString,date:h.created});
         const arr=tr.find(t=>t.to===col||t.to.toLowerCase().includes(colLower));
         const ad=arr?new Date(arr.date):null;
         const delay=ad&&sprintStart?Math.round((ad-sprintStart)/86400000*10)/10:null;
@@ -215,16 +228,20 @@ async function loadSprint(){
         done++;
         document.getElementById('progFill').style.width=Math.round(done/total*100)+'%';
         return{id:issue.key,title:issue.fields.summary,status:issue.fields.status?.name||'?',assignee:issue.fields.assignee?.displayName||'—',ad,delay,risk};
-      }catch{done++;return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',ad:null,delay:null,risk:'notyet'};}
+      }catch{
+        done++;
+        return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',ad:null,delay:null,risk:'notyet'};
+      }
     }));
+
     allT=enriched;
-    document.getElementById('prog').style.display='none';
+    hide('prog');
     render(enriched,seuil,col);
     setStatus('ok','À jour');
     document.getElementById('rfInfo').textContent='Mis à jour : '+new Date().toLocaleTimeString('fr-FR');
   }catch(e){
     setStatus('err','Erreur : '+e.message);
-    document.getElementById('prog').style.display='none';
+    hide('prog');
     document.getElementById('tList').innerHTML='<div class="empty">❌ '+e.message+'</div>';
   }
 }
@@ -234,18 +251,30 @@ function render(e,seuil,col){
   const arr=e.filter(t=>t.delay!==null);
   const notyet=e.filter(t=>t.risk==='notyet');
   const avg=arr.length?(arr.reduce((s,t)=>s+t.delay,0)/arr.length).toFixed(1):'—';
-  document.getElementById('alertTxt').innerHTML='<strong>⚠️ '+late.length+' tickets sur '+arr.length+' sont arrivés en "'+col+'" après J+'+seuil+' ('+Math.round(late.length/Math.max(arr.length,1)*100)+'%).</strong> Délai moyen : J+'+avg+'. '+notyet.length+' tickets pas encore prêts à tester. Ces données prouvent que les US arrivent trop tard pour permettre des tests métier en début de convergence.';
+
+  document.getElementById('alertTxt').innerHTML=
+    '<strong>⚠️ '+late.length+' tickets sur '+arr.length+' sont arrivés en "'+col+
+    '" après J+'+seuil+' ('+Math.round(late.length/Math.max(arr.length,1)*100)+'%).</strong> '+
+    'Délai moyen : J+'+avg+'. '+notyet.length+' tickets pas encore prêts à tester. '+
+    'Ces données prouvent que les US arrivent trop tard pour permettre des tests métier en début de convergence.';
+
   document.getElementById('metrics').innerHTML=
     '<div class="metric"><div class="metric-l">Tickets sprint</div><div class="metric-v">'+e.length+'</div><div class="metric-s">total</div></div>'+
     '<div class="metric"><div class="metric-l">Tardifs</div><div class="metric-v vr">'+late.length+'</div><div class="metric-s">après J+'+seuil+'</div></div>'+
     '<div class="metric"><div class="metric-l">Délai moyen</div><div class="metric-v va">J+'+avg+'</div><div class="metric-s">seuil : J+'+seuil+'</div></div>'+
     '<div class="metric"><div class="metric-l">Non prêts</div><div class="metric-v">'+notyet.length+'</div><div class="metric-s">pas encore testables</div></div>';
+
   const bk={};
   arr.forEach(t=>{const b=Math.floor(t.delay);bk[b]=(bk[b]||0)+1;});
   const maxB=arr.length?Math.max(...Object.keys(bk).map(Number)):0;
   const maxV=arr.length?Math.max(...Object.values(bk)):1;
   let h='';
-  for(let d=0;d<=maxB;d++){const c=bk[d]||0;const ht=c>0?Math.max(6,Math.round(c/maxV*75)):3;const color=d<seuil?'var(--green)':d<=seuil+1?'var(--amber)':'var(--red)';h+=`<div class="hcol"><div class="hval">${c>0?c:''}</div><div class="hbar" style="height:${ht}px;background:${color}"></div><div class="hlbl">J+${d}</div></div>`;}
+  for(let d=0;d<=maxB;d++){
+    const c=bk[d]||0;
+    const ht=c>0?Math.max(6,Math.round(c/maxV*75)):3;
+    const color=d<seuil?'var(--green)':d<=seuil+1?'var(--amber)':'var(--red)';
+    h+=`<div class="hcol"><div class="hval">${c>0?c:''}</div><div class="hbar" style="height:${ht}px;background:${color}"></div><div class="hlbl">J+${d}</div></div>`;
+  }
   document.getElementById('histo').innerHTML=h;
   document.getElementById('seuilTag').textContent='Seuil J+'+seuil;
   document.getElementById('lb').textContent='('+late.length+')';
@@ -254,31 +283,59 @@ function render(e,seuil,col){
 
 function switchTab(el,tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');curTab=tab;
+  el.classList.add('active');
+  curTab=tab;
   renderTab(tab,allT,parseInt(document.getElementById('seuil').value));
 }
 
 function renderTab(tab,e,seuil){
-  let list=tab==='late'?e.filter(t=>t.risk==='late'||t.risk==='medium'):tab==='all'?e.filter(t=>t.delay!==null):e.filter(t=>t.risk==='notyet');
+  const list=tab==='late'?e.filter(t=>t.risk==='late'||t.risk==='medium'):
+             tab==='all'?e.filter(t=>t.delay!==null):
+             e.filter(t=>t.risk==='notyet');
   const s=[...list].sort((a,b)=>(b.delay??999)-(a.delay??999));
   if(!s.length){document.getElementById('tList').innerHTML='<div class="empty">Aucun ticket dans cette catégorie</div>';return;}
   document.getElementById('tList').innerHTML=s.map(t=>{
     const rc={late:'rl',medium:'rm',ok:'ro',notyet:'rn'}[t.risk];
     const rl={late:'Tardif',medium:'Limite',ok:'Dans les temps',notyet:'Pas encore'}[t.risk];
     const dc=t.risk==='late'?'dpr':t.risk==='medium'?'dpa':'';
-    return`<div class="tcard ${t.risk}"><div class="tt"><span class="tid">${t.id}</span><span class="ttitle" title="${t.title}">${t.title}</span><span class="rbadge ${rc}">${rl}</span></div><div class="tm"><span>👤 ${t.assignee}</span>${t.ad?`<span>📅 ${fd(t.ad.toISOString())}</span>`:''} ${t.delay!==null?`<span>⏱ <strong>J+${t.delay}</strong></span>`:''}<span>📌 ${t.status}</span>${(t.risk==='late'||t.risk==='medium')?`<span class="dpill ${dc}" style="margin-left:auto">+${(t.delay-seuil).toFixed(1)}j vs seuil</span>`:''}</div></div>`;
+    return`<div class="tcard ${t.risk}">
+      <div class="tt">
+        <span class="tid">${t.id}</span>
+        <span class="ttitle" title="${t.title}">${t.title}</span>
+        <span class="rbadge ${rc}">${rl}</span>
+      </div>
+      <div class="tm">
+        <span>👤 ${t.assignee}</span>
+        ${t.ad?`<span>📅 ${fd(t.ad.toISOString())}</span>`:''}
+        ${t.delay!==null?`<span>⏱ <strong>J+${t.delay}</strong></span>`:''}
+        <span>📌 ${t.status}</span>
+        ${(t.risk==='late'||t.risk==='medium')?`<span class="dpill ${dc}" style="margin-left:auto">+${(t.delay-seuil).toFixed(1)}j vs seuil</span>`:''}
+      </div>
+    </div>`;
   }).join('');
 }
 
 function toggleAR(){
   const btn=document.getElementById('arBtn');
-  if(isAR){clearInterval(timer);isAR=false;btn.textContent='⟳ Auto-refresh (5 min)';btn.style.background='';}
-  else{isAR=true;btn.textContent='⏹ Arrêter';btn.style.background='var(--green-bg)';loadSprint();timer=setInterval(loadSprint,5*60*1000);}
+  if(isAR){
+    clearInterval(timer);isAR=false;
+    btn.textContent='⟳ Auto-refresh (5 min)';btn.style.background='';
+  }else{
+    isAR=true;
+    btn.textContent='⏹ Arrêter';btn.style.background='var(--green-bg)';
+    loadSprint();timer=setInterval(loadSprint,5*60*1000);
+  }
 }
 
-function fd(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});}
+function fd(iso){
+  if(!iso)return'—';
+  return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+}
 
-window.addEventListener('load',()=>{const s=localStorage.getItem('jira_email');if(s)document.getElementById('email').value=s;});
+window.addEventListener('load',()=>{
+  const s=localStorage.getItem('jira_email');
+  if(s)document.getElementById('email').value=s;
+});
 </script>
 </body>
 </html>
