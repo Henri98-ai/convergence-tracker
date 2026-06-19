@@ -16,11 +16,13 @@ h1{font-size:17px;font-weight:600}
 .sub{font-size:12px;color:var(--text3);margin-top:1px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1.5rem;box-shadow:var(--sh)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px}
 label{display:block;font-size:11px;font-weight:500;color:var(--text2);margin-bottom:4px;letter-spacing:.03em;text-transform:uppercase}
 input,select{width:100%;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--bg);color:var(--text);outline:none;font-family:inherit}
 input:focus,select:focus{border-color:var(--blue)}
 input[type=password]{font-family:monospace;letter-spacing:.05em}
+input[type=date]{padding:0 8px}
 .info-box{font-size:11px;color:var(--text2);background:var(--blue-bg);border:1px solid #C8DCF2;border-radius:6px;padding:8px 10px;margin-bottom:12px}
 .info-box strong{color:var(--blue)}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -36,6 +38,13 @@ input[type=password]{font-family:monospace;letter-spacing:.05em}
 .sprint-row .f{flex:1;min-width:180px}
 .prog{height:3px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
 .prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.5rem;box-shadow:var(--sh)}
+.filter-bar-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.filter-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.filter-row .f{flex:1;min-width:140px}
+.active-filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.filter-tag{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--blue-bg);color:var(--blue);border:1px solid #C8DCF2;display:flex;align-items:center;gap:6px}
+.filter-tag button{background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;line-height:1;padding:0}
 .sprint-name{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:2px}
 .sprint-sub{font-size:12px;color:var(--text3);margin-bottom:1.5rem}
 .alert{background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--r);padding:12px 14px;margin-bottom:1.5rem;font-size:13px;color:#7A1E14;line-height:1.55}
@@ -70,6 +79,9 @@ input[type=password]{font-family:monospace;letter-spacing:.05em}
 .rm{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b)}
 .ro{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
 .rn{background:var(--bg);color:var(--text3);border:1px solid var(--border)}
+.type-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;flex-shrink:0;background:#EEE;color:#555}
+.type-us{background:#E8F0FE;color:#1A56DB}
+.type-bug{background:var(--red-bg);color:var(--red)}
 .tm{display:flex;gap:12px;font-size:11px;color:var(--text3);flex-wrap:wrap;align-items:center}
 .dpill{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:auto}
 .dpr{background:var(--red-bg);color:var(--red)}.dpa{background:var(--amber-bg);color:var(--amber)}
@@ -105,11 +117,11 @@ input[type=password]{font-family:monospace;letter-spacing:.05em}
     </div>
     <div><label>&nbsp;</label><button class="btn btn-p" onclick="connect()" style="width:100%">Charger les sprints →</button></div>
   </div>
-  <div class="info-box"><strong>ℹ️ Proxy CORS :</strong> Les appels Jira transitent par corsproxy.io pour contourner les restrictions navigateur. Votre token reste dans votre session locale.</div>
+  <div class="info-box"><strong>ℹ️ Proxy CORS :</strong> Les appels Jira transitent par corsproxy.io. Votre token reste dans votre session locale.</div>
   <div class="row"><div class="status"><div class="dot" id="dot"></div><span id="stxt">Non connecté</span></div></div>
 </div>
 
-<!-- SPRINT SELECTOR — toujours dans le DOM, caché via classe -->
+<!-- SPRINT SELECTOR -->
 <div class="card hidden" id="sprintBar">
   <div class="sprint-row">
     <div class="f"><label>Sprint à analyser</label><select id="sprintSel"></select></div>
@@ -123,6 +135,41 @@ input[type=password]{font-family:monospace;letter-spacing:.05em}
 <div class="hidden" id="main">
   <div class="sprint-name" id="sName"></div>
   <div class="sprint-sub" id="sSub"></div>
+
+  <!-- FILTRES ACTIFS -->
+  <div class="filter-bar">
+    <div class="filter-bar-title">Filtres</div>
+    <div class="filter-row">
+      <div class="f">
+        <label>Type de ticket</label>
+        <select id="filterType" onchange="applyFilters()">
+          <option value="all">Tous les types</option>
+          <option value="us">User Stories uniquement</option>
+          <option value="bug">Bugs uniquement</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Arrivée en test après le</label>
+        <input type="date" id="filterDate" onchange="applyFilters()">
+      </div>
+      <div class="f">
+        <label>Priorité</label>
+        <select id="filterPriority" onchange="applyFilters()">
+          <option value="all">Toutes les priorités</option>
+          <option value="Critique">Critique</option>
+          <option value="Elevé">Élevé</option>
+          <option value="Moyen">Moyen</option>
+          <option value="Faible">Faible</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>&nbsp;</label>
+        <button class="btn btn-s" onclick="resetFilters()" style="width:100%">✕ Réinitialiser</button>
+      </div>
+    </div>
+    <div class="active-filters" id="activeTags"></div>
+  </div>
+
   <div class="alert" id="alertTxt"></div>
   <div class="metrics" id="metrics"></div>
   <div class="chart-card">
@@ -153,20 +200,18 @@ const BOARD=127;
 const PROXY='https://corsproxy.io/?url=';
 let auth='',sprintStart=null,allT=[],timer=null,isAR=false,curTab='late';
 
+// Types considérés comme User Stories (noms Jira courants)
+const US_TYPES=['story','user story','us','histoire','fonctionnalité','feature','epic'];
+const BUG_TYPES=['bug','bogue','défaut','incident','anomalie'];
+
 function show(id){document.getElementById(id).classList.remove('hidden');}
 function hide(id){document.getElementById(id).classList.add('hidden');}
-
-function setStatus(s,m){
-  document.getElementById('dot').className='dot '+(s||'');
-  document.getElementById('stxt').textContent=m;
-}
+function setStatus(s,m){document.getElementById('dot').className='dot '+(s||'');document.getElementById('stxt').textContent=m;}
 
 async function api(path,params){
   let url=JIRA+path;
   if(params)url+='?'+new URLSearchParams(params);
-  const r=await fetch(PROXY+encodeURIComponent(url),{
-    headers:{'Authorization':auth,'Accept':'application/json','x-requested-with':'XMLHttpRequest'}
-  });
+  const r=await fetch(PROXY+encodeURIComponent(url),{headers:{'Authorization':auth,'Accept':'application/json','x-requested-with':'XMLHttpRequest'}});
   if(!r.ok)throw new Error(r.status+' '+r.statusText);
   return r.json();
 }
@@ -203,12 +248,17 @@ async function loadSprint(){
   document.getElementById('metrics').innerHTML='';
   document.getElementById('alertTxt').textContent='';
   document.getElementById('histo').innerHTML='';
+  // Réinitialiser les filtres à chaque nouveau sprint
+  document.getElementById('filterDate').value='';
+  document.getElementById('filterType').value='all';
+  document.getElementById('filterPriority').value='all';
+  document.getElementById('activeTags').innerHTML='';
   show('prog');
   document.getElementById('progFill').style.width='3%';
   setStatus('loading','Chargement...');
 
   try{
-    const data=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:200,fields:'summary,status,priority,assignee'});
+    const data=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:200,fields:'summary,status,priority,assignee,issuetype'});
     const issues=data.issues||[];
     const total=issues.length;
     let done=0;
@@ -225,18 +275,31 @@ async function loadSprint(){
         const ad=arr?new Date(arr.date):null;
         const delay=ad&&sprintStart?Math.round((ad-sprintStart)/86400000*10)/10:null;
         const risk=delay===null?'notyet':delay<seuil?'ok':delay<=seuil+1?'medium':'late';
+        const issueTypeName=(issue.fields.issuetype?.name||'').toLowerCase();
+        let typeCategory='other';
+        if(US_TYPES.some(t=>issueTypeName.includes(t)))typeCategory='us';
+        else if(BUG_TYPES.some(t=>issueTypeName.includes(t)))typeCategory='bug';
         done++;
         document.getElementById('progFill').style.width=Math.round(done/total*100)+'%';
-        return{id:issue.key,title:issue.fields.summary,status:issue.fields.status?.name||'?',assignee:issue.fields.assignee?.displayName||'—',ad,delay,risk};
+        return{
+          id:issue.key,
+          title:issue.fields.summary,
+          status:issue.fields.status?.name||'?',
+          assignee:issue.fields.assignee?.displayName||'—',
+          priority:issue.fields.priority?.name||'—',
+          issueType:issue.fields.issuetype?.name||'?',
+          typeCategory,
+          ad,delay,risk
+        };
       }catch{
         done++;
-        return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',ad:null,delay:null,risk:'notyet'};
+        return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',priority:'—',issueType:'?',typeCategory:'other',ad:null,delay:null,risk:'notyet'};
       }
     }));
 
     allT=enriched;
     hide('prog');
-    render(enriched,seuil,col);
+    applyFilters();
     setStatus('ok','À jour');
     document.getElementById('rfInfo').textContent='Mis à jour : '+new Date().toLocaleTimeString('fr-FR');
   }catch(e){
@@ -246,20 +309,68 @@ async function loadSprint(){
   }
 }
 
+function applyFilters(){
+  if(!allT.length)return;
+  const seuil=parseInt(document.getElementById('seuil').value);
+  const col=document.getElementById('colTester').value.trim();
+  const filterType=document.getElementById('filterType').value;
+  const filterDateVal=document.getElementById('filterDate').value;
+  const filterPriority=document.getElementById('filterPriority').value;
+  const filterDate=filterDateVal?new Date(filterDateVal):null;
+
+  // Construire les tags actifs
+  const tags=[];
+  if(filterType==='us')tags.push({label:'Type : User Stories uniquement',key:'type'});
+  if(filterType==='bug')tags.push({label:'Type : Bugs uniquement',key:'type'});
+  if(filterDate)tags.push({label:'Arrivée après le '+fd(filterDateVal),key:'date'});
+  if(filterPriority!=='all')tags.push({label:'Priorité : '+filterPriority,key:'priority'});
+  document.getElementById('activeTags').innerHTML=tags.map(t=>
+    `<div class="filter-tag">${t.label}<button onclick="clearFilter('${t.key}')">✕</button></div>`
+  ).join('');
+
+  let filtered=allT.filter(t=>{
+    if(filterType==='us'&&t.typeCategory!=='us')return false;
+    if(filterType==='bug'&&t.typeCategory!=='bug')return false;
+    if(filterDate&&t.ad&&t.ad<filterDate)return false;
+    if(filterDate&&!t.ad)return false; // si filtre date actif, exclure les non-testés
+    if(filterPriority!=='all'&&t.priority!==filterPriority)return false;
+    return true;
+  });
+
+  render(filtered,seuil,col);
+}
+
+function clearFilter(key){
+  if(key==='type')document.getElementById('filterType').value='all';
+  if(key==='date')document.getElementById('filterDate').value='';
+  if(key==='priority')document.getElementById('filterPriority').value='all';
+  applyFilters();
+}
+
+function resetFilters(){
+  document.getElementById('filterType').value='all';
+  document.getElementById('filterDate').value='';
+  document.getElementById('filterPriority').value='all';
+  applyFilters();
+}
+
 function render(e,seuil,col){
   const late=e.filter(t=>t.risk==='late');
   const arr=e.filter(t=>t.delay!==null);
   const notyet=e.filter(t=>t.risk==='notyet');
   const avg=arr.length?(arr.reduce((s,t)=>s+t.delay,0)/arr.length).toFixed(1):'—';
 
+  const filterInfo=document.getElementById('filterType').value!=='all'||document.getElementById('filterDate').value||document.getElementById('filterPriority').value!=='all'
+    ?' (sur la sélection filtrée)':'';
+
   document.getElementById('alertTxt').innerHTML=
     '<strong>⚠️ '+late.length+' tickets sur '+arr.length+' sont arrivés en "'+col+
-    '" après J+'+seuil+' ('+Math.round(late.length/Math.max(arr.length,1)*100)+'%).</strong> '+
+    '" après J+'+seuil+' ('+Math.round(late.length/Math.max(arr.length,1)*100)+'%)'+filterInfo+'.</strong> '+
     'Délai moyen : J+'+avg+'. '+notyet.length+' tickets pas encore prêts à tester. '+
     'Ces données prouvent que les US arrivent trop tard pour permettre des tests métier en début de convergence.';
 
   document.getElementById('metrics').innerHTML=
-    '<div class="metric"><div class="metric-l">Tickets sprint</div><div class="metric-v">'+e.length+'</div><div class="metric-s">total</div></div>'+
+    '<div class="metric"><div class="metric-l">Tickets</div><div class="metric-v">'+e.length+'</div><div class="metric-s">sélection actuelle</div></div>'+
     '<div class="metric"><div class="metric-l">Tardifs</div><div class="metric-v vr">'+late.length+'</div><div class="metric-s">après J+'+seuil+'</div></div>'+
     '<div class="metric"><div class="metric-l">Délai moyen</div><div class="metric-v va">J+'+avg+'</div><div class="metric-s">seuil : J+'+seuil+'</div></div>'+
     '<div class="metric"><div class="metric-l">Non prêts</div><div class="metric-v">'+notyet.length+'</div><div class="metric-s">pas encore testables</div></div>';
@@ -285,7 +396,21 @@ function switchTab(el,tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   curTab=tab;
-  renderTab(tab,allT,parseInt(document.getElementById('seuil').value));
+  const seuil=parseInt(document.getElementById('seuil').value);
+  // Récupérer les données filtrées courantes
+  const filterType=document.getElementById('filterType').value;
+  const filterDateVal=document.getElementById('filterDate').value;
+  const filterPriority=document.getElementById('filterPriority').value;
+  const filterDate=filterDateVal?new Date(filterDateVal):null;
+  let filtered=allT.filter(t=>{
+    if(filterType==='us'&&t.typeCategory!=='us')return false;
+    if(filterType==='bug'&&t.typeCategory!=='bug')return false;
+    if(filterDate&&t.ad&&t.ad<filterDate)return false;
+    if(filterDate&&!t.ad)return false;
+    if(filterPriority!=='all'&&t.priority!==filterPriority)return false;
+    return true;
+  });
+  renderTab(tab,filtered,seuil);
 }
 
 function renderTab(tab,e,seuil){
@@ -294,13 +419,16 @@ function renderTab(tab,e,seuil){
              e.filter(t=>t.risk==='notyet');
   const s=[...list].sort((a,b)=>(b.delay??999)-(a.delay??999));
   if(!s.length){document.getElementById('tList').innerHTML='<div class="empty">Aucun ticket dans cette catégorie</div>';return;}
+
   document.getElementById('tList').innerHTML=s.map(t=>{
     const rc={late:'rl',medium:'rm',ok:'ro',notyet:'rn'}[t.risk];
     const rl={late:'Tardif',medium:'Limite',ok:'Dans les temps',notyet:'Pas encore'}[t.risk];
     const dc=t.risk==='late'?'dpr':t.risk==='medium'?'dpa':'';
+    const typeCls=t.typeCategory==='us'?'type-us':t.typeCategory==='bug'?'type-bug':'';
     return`<div class="tcard ${t.risk}">
       <div class="tt">
         <span class="tid">${t.id}</span>
+        <span class="type-badge ${typeCls}">${t.issueType}</span>
         <span class="ttitle" title="${t.title}">${t.title}</span>
         <span class="rbadge ${rc}">${rl}</span>
       </div>
@@ -309,6 +437,7 @@ function renderTab(tab,e,seuil){
         ${t.ad?`<span>📅 ${fd(t.ad.toISOString())}</span>`:''}
         ${t.delay!==null?`<span>⏱ <strong>J+${t.delay}</strong></span>`:''}
         <span>📌 ${t.status}</span>
+        <span>🏷 ${t.priority}</span>
         ${(t.risk==='late'||t.risk==='medium')?`<span class="dpill ${dc}" style="margin-left:auto">+${(t.delay-seuil).toFixed(1)}j vs seuil</span>`:''}
       </div>
     </div>`;
@@ -317,14 +446,8 @@ function renderTab(tab,e,seuil){
 
 function toggleAR(){
   const btn=document.getElementById('arBtn');
-  if(isAR){
-    clearInterval(timer);isAR=false;
-    btn.textContent='⟳ Auto-refresh (5 min)';btn.style.background='';
-  }else{
-    isAR=true;
-    btn.textContent='⏹ Arrêter';btn.style.background='var(--green-bg)';
-    loadSprint();timer=setInterval(loadSprint,5*60*1000);
-  }
+  if(isAR){clearInterval(timer);isAR=false;btn.textContent='⟳ Auto-refresh (5 min)';btn.style.background='';}
+  else{isAR=true;btn.textContent='⏹ Arrêter';btn.style.background='var(--green-bg)';loadSprint();timer=setInterval(loadSprint,5*60*1000);}
 }
 
 function fd(iso){
