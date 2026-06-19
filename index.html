@@ -467,6 +467,7 @@ function cardHtml(t){
       ${t.ad?`<span>📅 <strong>${fd(t.ad.toISOString())}</strong></span>`:'<span>📅 Pas encore à tester</span>'}
       ${t.delay!==null?`<span class="day-pill">J+${t.delay}</span>`:''}
       <span>📌 ${t.status}</span>
+      <span style="font-size:10px;background:#f0f0f0;padding:1px 6px;border-radius:4px;color:#555">type brut: "${t.issueType}"</span>
     </div>
   </div>`;
 }
