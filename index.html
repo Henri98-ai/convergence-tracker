@@ -303,9 +303,10 @@ async function loadSprint(){
     let issues=[];
     let startAt=0;
     const pageSize=50;
-    const jql='sprint='+id+' ORDER BY created ASC';
+    const sprintName=opt.dataset.name;
+    const jql='sprint="'+sprintName+'" ORDER BY created ASC';
     while(true){
-      const pageData=await api('/rest/api/3/search',{jql,maxResults:pageSize,startAt:startAt,fields:fields});
+      const pageData=await api('/rest/api/3/search',{jql:jql,maxResults:pageSize,startAt:startAt,fields:fields});
       const page=pageData.issues||[];
       issues.push(...page);
       document.getElementById('progLabel').textContent='Chargement des tickets... ('+issues.length+'/'+(pageData.total||'?')+')';
