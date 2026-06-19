@@ -303,10 +303,14 @@ async function loadSprint(){
     let issues=[];
     let startAt=0;
     const pageSize=50;
-    const sprintName=opt.dataset.name;
-    const jql='sprint="'+sprintName+'" ORDER BY created ASC';
+    // Endpoint agile avec pagination complète
     while(true){
-      const pageData=await api('/rest/api/3/search',{jql:jql,maxResults:pageSize,startAt:startAt,fields:fields});
+      const pageData=await api('/rest/agile/1.0/board/'+BOARD+'/issue',{
+        jql:'sprint='+id,
+        maxResults:pageSize,
+        startAt:startAt,
+        fields:fields
+      });
       const page=pageData.issues||[];
       issues.push(...page);
       document.getElementById('progLabel').textContent='Chargement des tickets... ('+issues.length+'/'+(pageData.total||'?')+')';
