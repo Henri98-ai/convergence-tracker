@@ -288,8 +288,19 @@ async function loadSprint(){
   document.getElementById('progLabel').textContent='Chargement de la liste des tickets...';
 
   try{
-    const data=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:200,fields});
-    const issues=data.issues||[];
+    // Récupérer toutes les pages de tickets (pagination)
+    let issues=[];
+    let startAt=0;
+    const pageSize=50;
+    while(true){
+      const pageData=await api('/rest/agile/1.0/sprint/'+id+'/issue',{maxResults:pageSize,startAt:startAt,fields:fields});
+      const page=pageData.issues||[];
+      issues.push(...page);
+      document.getElementById('progLabel').textContent='Chargement des tickets... ('+issues.length+'/'+(pageData.total||'?')+')';
+      if(issues.length>=(pageData.total||0)||page.length<pageSize)break;
+      startAt+=pageSize;
+      await sleep(300);
+    }
     const total=issues.length;
     let done=0;
     const colLower=col.toLowerCase().replace(/^\d+ - /,'');
