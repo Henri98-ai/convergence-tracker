@@ -46,8 +46,9 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
             return
 
-        # Vérifier le mot de passe pour toutes les autres routes
-        app_pwd = self.headers.get("X-App-Password", "")
+        # Vérifier le mot de passe depuis header OU paramètre URL
+        params_all = urllib.parse.parse_qs(parsed.query)
+        app_pwd = self.headers.get("X-App-Password", "") or params_all.get("pwd", [""])[0]
         if app_pwd != APP_PASSWORD:
             self.send_response(401)
             self.send_cors()
