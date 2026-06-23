@@ -284,11 +284,11 @@ async function api(path,params,retries=2){
     try{
       let r;
       if(useLocal){
-        // Via serveur local Python — direct, sans limite
+        // Via serveur (local ou Render)
         const query=params?new URLSearchParams(params).toString():'';
         const url=LOCAL+'/jira?path='+encodeURIComponent(path)+(query?'&query='+encodeURIComponent(query):'');
-        const pwd=document.getElementById('appPassword')?.value||'';
-        r=await fetch(url,{headers:{'Authorization':auth,'X-App-Password':pwd}});
+        const pwd=document.getElementById('appPassword')?.value||localStorage.getItem('app_password')||'';
+        r=await fetch(url,{headers:{'Authorization':auth,'X-App-Password':pwd,'Accept':'application/json'}});
       } else {
         // Via proxy public
         let url=JIRA+path;
