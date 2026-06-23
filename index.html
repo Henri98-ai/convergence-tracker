@@ -41,8 +41,8 @@ input[type=date]{padding:0 8px}
 .prog-label{font-size:11px;color:var(--text3);margin-top:4px;text-align:center}
 .sprint-name{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:2px}
 .sprint-sub{font-size:12px;color:var(--text3);margin-bottom:1.5rem}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
-@media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem}
+@media(max-width:800px){.metrics{grid-template-columns:repeat(3,1fr)}}@media(max-width:500px){.metrics{grid-template-columns:repeat(2,1fr)}}
 .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
 .metric-l{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
 .metric-v{font-size:26px;font-weight:700;letter-spacing:-.03em}
@@ -82,6 +82,15 @@ input[type=date]{padding:0 8px}
 .sort-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text2)}
 .sort-btn.active{background:var(--text);color:white;border-color:var(--text)}
 .empty{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
+.metric{cursor:pointer;transition:box-shadow .15s}
+.metric:hover{box-shadow:0 0 0 2px var(--blue)}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.35);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.modal{background:var(--surface);border-radius:var(--r);width:100%;max-width:720px;box-shadow:0 8px 32px rgba(0,0,0,.18);overflow:hidden}
+.modal-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:14px;font-weight:600}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);line-height:1;padding:0}
+.modal-body{padding:14px 18px;max-height:70vh;overflow-y:auto}
+.modal-count{font-size:11px;color:var(--text3);margin-bottom:12px}
 .lmsg{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
 </style>
 </head>
@@ -102,6 +111,14 @@ input[type=date]{padding:0 8px}
         <div style="margin-top:6px;display:flex;align-items:center;gap:6px">
           <input type="checkbox" id="rememberToken" style="width:14px;height:14px;margin:0;cursor:pointer">
           <label for="rememberToken" style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;cursor:pointer;margin:0">Se souvenir du token sur cet appareil</label>
+        </div>
+      </div>
+      <div>
+        <label>Mot de passe app</label>
+        <input type="password" id="appPassword" placeholder="Mot de passe partagé" autocomplete="off">
+        <div style="margin-top:6px;display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="rememberPassword" style="width:14px;height:14px;margin:0;cursor:pointer">
+          <label for="rememberPassword" style="font-size:11px;color:var(--text3);text-transform:none;letter-spacing:0;cursor:pointer;margin:0">Se souvenir du mot de passe</label>
         </div>
       </div>
   </div>
@@ -168,6 +185,7 @@ input[type=date]{padding:0 8px}
           <option value="Faible">Faible</option>
         </select>
       </div>
+
     </div>
     <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
       <button class="btn btn-s" onclick="resetFilters()">✕ Réinitialiser les filtres</button>
@@ -196,14 +214,50 @@ input[type=date]{padding:0 8px}
 </div>
 
 </div>
+
+<!-- Modale détail métrique -->
+<div class="modal-overlay hidden" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle"></span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="modalRevueWrap" class="hidden" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:11px;color:var(--text2);white-space:nowrap">Équipe :</label>
+            <select id="modalTeamFilter" onchange="showModal(currentModalType)" style="height:30px;font-size:12px;padding:0 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg)">
+              <option value="all">Toutes</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <label style="font-size:11px;color:var(--text2);white-space:nowrap">Revue commando :</label>
+            <select id="modalRevueFilter" onchange="showModal(currentModalType)" style="height:30px;font-size:12px;padding:0 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg)">
+              <option value="all">Toutes</option>
+              <option value="Validé">Validé</option>
+              <option value="Vide">Vide</option>
+            </select>
+          </div>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.add('hidden')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-count" id="modalCount"></div>
+      <div class="ticket-list" id="modalList"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 const JIRA='https://isagri.atlassian.net';
 const BOARD=127;
-const PROXY='https://api.allorigins.win/raw?url=';
+const PROXY=''; // Serveur local
+const LOCAL='http://localhost:5000';
+let useLocal=false; // bascule automatique
 const US_TYPES=['user story'];
 const BUG_TYPES=['bug','bogue','défaut','incident','anomalie'];
 const TEAM_COLORS=['#1D5FA4','#2D6A2D','#B45309','#C8392B','#6B21A8','#0E7490','#92400E','#166534','#9D174D','#1E3A5F'];
-let auth='',sprintStart=null,sprintEnd=null,allT=[],timer=null,isAR=false,curTab='arrived',curSort='team',teamColorMap={};
+let auth='',sprintStart=null,sprintEnd=null,allT=[],timer=null,isAR=false,curTab='arrived',curSort='team',teamColorMap={},revueFieldId=null;
+let cache={}; // cache[sprintId][issueKey] = {delay, ad, ...}
 
 function show(id){document.getElementById(id).classList.remove('hidden');}
 function hide(id){document.getElementById(id).classList.add('hidden');}
@@ -223,16 +277,24 @@ async function processInBatches(items, fn, batchSize=5, delayMs=300){
 }
 
 async function api(path,params,retries=2){
-  let url=JIRA+path;
-  if(params)url+='?'+new URLSearchParams(params);
   for(let attempt=0;attempt<=retries;attempt++){
     try{
-      const r=await fetch(PROXY+encodeURIComponent(url),{headers:{'Authorization':auth,'Accept':'application/json','x-requested-with':'XMLHttpRequest'}});
-      if(r.status===429){
-        // Rate limited — attendre et réessayer
-        await sleep(1500*(attempt+1));
-        continue;
+      let r;
+      if(useLocal){
+        // Via serveur local Python — direct, sans limite
+        const query=params?new URLSearchParams(params).toString():'';
+        const url=LOCAL+'/jira?path='+encodeURIComponent(path)+(query?'&query='+encodeURIComponent(query):'');
+        const pwd=document.getElementById('appPassword')?.value||'';
+        r=await fetch(url,{headers:{'Authorization':auth,'X-App-Password':pwd}});
+      } else {
+        // Via proxy public
+        let url=JIRA+path;
+        if(params)url+='?'+new URLSearchParams(params);
+        r=await fetch('https://corsproxy.io/?url='+encodeURIComponent(url),{
+          headers:{'Authorization':auth,'Accept':'application/json','x-requested-with':'XMLHttpRequest'}
+        });
       }
+      if(r.status===429){await sleep(1500*(attempt+1));continue;}
       if(!r.ok)throw new Error(r.status+' '+r.statusText);
       return await r.json();
     }catch(e){
@@ -242,10 +304,20 @@ async function api(path,params,retries=2){
   }
 }
 
+async function tryLocalServer(){
+  try{
+    const r=await fetch(LOCAL+'/auth?token='+encodeURIComponent(btoa(document.getElementById('email').value+':'+document.getElementById('token').value)),{method:'GET'});
+    if(r.ok){useLocal=true;return true;}
+  }catch{}
+  return false;
+}
+
 async function findTeamField(){
   try{
     const fields=await api('/rest/api/2/field');
     const tf=fields.find(f=>f.name.toLowerCase()==='team'||f.name.toLowerCase()==='équipe'||f.name.toLowerCase()==='squad');
+    const rf=fields.find(f=>f.name.toLowerCase()==='revue commando');
+    if(rf)revueFieldId=rf.id;
     return tf?tf.id:null;
   }catch{return null;}
 }
@@ -256,6 +328,9 @@ async function connect(){
   if(!em||!tk){setStatus('err','Email et token requis');return;}
   auth='Basic '+btoa(em+':'+tk);
   setStatus('loading','Connexion...');
+  // Détecter automatiquement si le serveur local est disponible
+  const hasLocal=await tryLocalServer();
+  if(hasLocal)setStatus('loading','Connexion via serveur local...');
   try{
     const d=await api('/rest/agile/1.0/board/'+BOARD+'/sprint',{state:'active,closed',maxResults:20});
     const sp=(d.values||[]).reverse();
@@ -278,6 +353,9 @@ async function loadSprint(){
   const col=document.getElementById('colTester').value.trim();
   const batchSize=parseInt(document.getElementById('batchSize').value);
 
+  // Initialiser le cache pour ce sprint si pas encore fait
+  if(!cache[id])cache[id]={};
+  const sprintCache=cache[id];
   show('main');
   document.getElementById('sName').textContent=opt.dataset.name;
   document.getElementById('sSub').textContent='Début : '+fd(opt.dataset.start)+' · Fin : '+fd(opt.dataset.end)+' · Colonne : "'+col+'"';
@@ -294,7 +372,9 @@ async function loadSprint(){
   setStatus('loading','Chargement...');
 
   const teamFieldId=await findTeamField();
-  const fields='summary,status,priority,assignee,issuetype'+(teamFieldId?','+teamFieldId:'');
+  // Filtrer uniquement les User Stories via JQL pour aller plus vite
+    const jqlFilter='issuetype="User Story"';
+    const fields='summary,status,priority,assignee,issuetype'+(teamFieldId?','+teamFieldId:'')+(revueFieldId?','+revueFieldId:'');
 
   document.getElementById('progLabel').textContent='Chargement de la liste des tickets...';
 
@@ -303,13 +383,13 @@ async function loadSprint(){
     let issues=[];
     let startAt=0;
     const pageSize=50;
-    // Recherche JQL complète via api/2 (inclut sous-tickets)
+    // Endpoint agile avec pagination complète
     while(true){
-      const pageData=await api('/rest/api/2/search',{
-        jql:'sprint='+id+' ORDER BY created ASC',
+      const pageData=await api('/rest/agile/1.0/sprint/'+id+'/issue',{
         maxResults:pageSize,
         startAt:startAt,
-        fields:fields
+        fields:fields,
+        jql:jqlFilter
       });
       const page=pageData.issues||[];
       issues.push(...page);
@@ -326,12 +406,24 @@ async function loadSprint(){
 
     const enriched=await processInBatches(issues, async issue=>{
       try{
-        const cl=await api('/rest/api/2/issue/'+issue.key+'/changelog',{maxResults:100,startAt:0});
+        const key=issue.key;
+        const cl=await api('/rest/api/2/issue/'+key+'/changelog',{maxResults:100,startAt:0});
         const tr=[];
+        let clTotal=cl.total||0;
         for(const h of cl.values||[])
           for(const it of h.items||[])
             if(it.field==='status')tr.push({to:it.toString,date:h.created});
-        const arr=tr.find(t=>t.to===col||t.to.toLowerCase().includes(colLower));
+        // Paginer si plus de 100 entrées dans le changelog
+        let clStart=100;
+        while(tr.length<clTotal && clStart<clTotal){
+          const cl2=await api('/rest/api/2/issue/'+key+'/changelog',{maxResults:100,startAt:clStart});
+          for(const h of cl2.values||[])
+            for(const it of h.items||[])
+              if(it.field==='status')tr.push({to:it.toString,date:h.created});
+          clStart+=100;
+        }
+        const arr=tr.find(t=>t.to.toLowerCase()===col.toLowerCase()||t.to.toLowerCase().includes(colLower));
+
         const ad=arr?new Date(arr.date):null;
         const delay=ad&&sprintStart?Math.round((ad-sprintStart)/86400000*10)/10:null;
         const typeName=(issue.fields.issuetype?.name||'').toLowerCase().trim();
@@ -346,14 +438,21 @@ async function loadSprint(){
           else if(tf?.value)team=tf.value;
           else if(Array.isArray(tf)&&tf[0])team=tf[0].name||tf[0].value||String(tf[0]);
         }
+        let revueCommando='';
+        if(revueFieldId&&issue.fields[revueFieldId]){
+          const rv=issue.fields[revueFieldId];
+          if(typeof rv==='string')revueCommando=rv;
+          else if(rv?.value)revueCommando=rv.value;
+          else if(rv?.name)revueCommando=rv.name;
+        }
         done++;
         const pct=Math.round(done/total*100);
         document.getElementById('progFill').style.width=pct+'%';
         document.getElementById('progLabel').textContent='Analyse des transitions ('+done+'/'+total+')...';
-        return{id:issue.key,title:issue.fields.summary,status:issue.fields.status?.name||'?',assignee:issue.fields.assignee?.displayName||'—',priority:issue.fields.priority?.name||'—',issueType:issue.fields.issuetype?.name||'?',typeCategory,team,ad,delay};
+        return{id:issue.key,title:issue.fields.summary,status:issue.fields.status?.name||'?',assignee:issue.fields.assignee?.displayName||'—',priority:issue.fields.priority?.name||'—',issueType:issue.fields.issuetype?.name||'?',typeCategory,team,revueCommando,ad,delay};
       }catch{
         done++;
-        return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',priority:'—',issueType:'?',typeCategory:'other',team:'Sans équipe',ad:null,delay:null};
+        return{id:issue.key,title:issue.fields.summary,status:'?',assignee:'—',priority:'—',issueType:'?',typeCategory:'other',team:'Sans équipe',revueCommando:'',ad:null,delay:null};
       }
     }, batchSize, 300);
 
@@ -369,7 +468,9 @@ async function loadSprint(){
 
     hide('progWrap');
     applyFilters();
-    setStatus('ok','À jour'+(teamFieldId?'':' — champ Team non trouvé'));
+    const cachedCount=Object.keys(sprintCache).length-enriched.length;
+    const cacheInfo=cachedCount>0?' — ⚡ '+cachedCount+' depuis cache':'';
+    setStatus('ok','À jour'+cacheInfo+(teamFieldId?'':' — champ Team non trouvé'));
     document.getElementById('rfInfo').textContent='Mis à jour : '+new Date().toLocaleTimeString('fr-FR');
   }catch(e){
     setStatus('err','Erreur : '+e.message);
@@ -432,10 +533,20 @@ function render(e){
   const notyet=e.filter(t=>t.ad===null);
   const avg=arrived.length?(arrived.reduce((s,t)=>s+t.delay,0)/arrived.length).toFixed(1):'—';
   const last=arrived.length?new Date(Math.max(...arrived.map(t=>t.ad.getTime()))):null;
-  document.getElementById('metrics').innerHTML=
-    '<div class="metric"><div class="metric-l">Tickets sélectionnés</div><div class="metric-v">'+e.length+'</div><div class="metric-s">total</div></div>'+
-    '<div class="metric"><div class="metric-l">Arrivés à tester</div><div class="metric-v" style="color:var(--blue)">'+arrived.length+'</div><div class="metric-s">ont atteint la colonne</div></div>'+
-    '<div class="metric"><div class="metric-l">Délai moyen d\'arrivée</div><div class="metric-v va">J+'+avg+'</div><div class="metric-s">'+(last?'dernier : '+fdShort(last.toISOString()):'')+'</div></div>';
+    // Compter les tickets dans chaque colonne clé (sur TOUS les tickets du sprint)
+  const colTest=document.getElementById('colTester').value.trim();
+  const inTester=allT.filter(t=>t.status.toLowerCase()===colTest.toLowerCase()).length;
+  const inProd=allT.filter(t=>t.status==='9 - A LIVRER EN PROD').length;
+  const m1='<div class="metric" onclick="showModal(\'selected\')"><div class="metric-l">Tickets sélectionnés</div><div class="metric-v">'+e.length+'</div><div class="metric-s">cliquer pour voir</div></div>';
+  const m2='<div class="metric" onclick="showModal(\'arrived\')"><div class="metric-l">Arrivés à tester</div><div class="metric-v" style="color:var(--blue)">'+arrived.length+'</div><div class="metric-s">cliquer pour voir</div></div>';
+
+  const inTesterSansRevue=allT.filter(t=>t.status.toLowerCase()===colTest.toLowerCase()&&(!t.revueCommando||t.revueCommando==='Vide')).length;
+  const m4='<div class="metric" style="border-color:#C8DCF2;cursor:pointer" onclick="showModal(\'inTester\')"><div class="metric-l" style="color:var(--blue)">📋 A tester en dev</div><div class="metric-v" style="color:var(--blue)">'+inTester+'</div><div class="metric-s"><span style="color:var(--red);font-weight:500">'+inTesterSansRevue+' sans revue commando</span></div></div>';
+  const inProdSansRevue=allT.filter(t=>t.status==='9 - A LIVRER EN PROD'&&(!t.revueCommando||t.revueCommando==='Vide')).length;
+  const m5='<div class="metric" style="border-color:#F0D88A" onclick="showModal(\'inProd\')"><div class="metric-l" style="color:var(--amber)">🚀 A livrer en prod</div><div class="metric-v" style="color:var(--amber)">'+inProd+'</div><div class="metric-s">'+inProdSansRevue+' sans revue commando</span></div></div>';
+  const revueValide=allT.filter(t=>t.revueCommando==='Validé').length;
+  const m6='<div class="metric" style="border-color:var(--green-b);cursor:pointer" onclick="showModal(\'revueValide\')"><div class="metric-l" style="color:var(--green)">✓ Revue commando</div><div class="metric-v" style="color:var(--green)">'+revueValide+'</div><div class="metric-s">validées sur '+allT.length+' tickets</div></div>';
+  document.getElementById('metrics').innerHTML=m1+m2+m4+m5+m6;
   document.getElementById('lb1').textContent='('+arrived.length+')';
   document.getElementById('lb2').textContent='('+notyet.length+')';
   renderTab(curTab,e);
@@ -495,10 +606,91 @@ function cardHtml(t){
       ${t.ad?`<span>📅 <strong>${fd(t.ad.toISOString())}</strong></span>`:'<span>📅 Pas encore à tester</span>'}
       ${t.delay!==null?`<span class="day-pill">J+${t.delay}</span>`:''}
       <span>📌 ${t.status}</span>
-      <span style="font-size:10px;background:#f0f0f0;padding:1px 6px;border-radius:4px;color:#555">type brut: "${t.issueType}"</span>
     </div>
   </div>`;
 }
+
+function showModal(type){
+  const filtered=getFiltered();
+  let tickets=[];
+  let title='';
+  const colTest=document.getElementById('colTester').value.trim();
+  if(type==='selected'){tickets=filtered;title='Tickets sélectionnés ('+filtered.length+')';}
+  else if(type==='arrived'){tickets=filtered.filter(t=>t.ad!==null);title='Arrivés à tester ('+tickets.length+')';}
+  else if(type==='inTester'){
+    const revueFilter=document.getElementById('modalRevueFilter')?.value||'all';
+    const teamFilter=document.getElementById('modalTeamFilter')?.value||'all';
+    let base=allT.filter(t=>t.status.toLowerCase()===colTest.toLowerCase());
+    if(teamFilter!=='all')base=base.filter(t=>t.team===teamFilter);
+    if(revueFilter==='Validé')base=base.filter(t=>t.revueCommando==='Validé');
+    if(revueFilter==='Vide')base=base.filter(t=>!t.revueCommando||t.revueCommando==='Vide');
+    tickets=base;
+    title='Actuellement en "'+colTest+'" ('+tickets.length+')';
+  }
+  else if(type==='inProd'){
+    const revueFilter=document.getElementById('modalRevueFilter')?.value||'all';
+    let base=allT.filter(t=>t.status==='9 - A LIVRER EN PROD');
+    if(revueFilter==='Validé')base=base.filter(t=>t.revueCommando==='Validé');
+    if(revueFilter==='Vide')base=base.filter(t=>!t.revueCommando||t.revueCommando==='Vide');
+    tickets=base;
+    title='Actuellement en "A livrer en prod" ('+tickets.length+')';
+  }
+  else if(type==='revueValide'){
+    tickets=allT.filter(t=>t.revueCommando==='Validé');
+    title='Revue commando validée ('+tickets.length+')';
+  }
+
+  currentModalType=type;
+  // Afficher les filtres uniquement pour inTester et inProd
+  const revueWrap=document.getElementById('modalRevueWrap');
+  if(type==='inTester'||type==='inProd'){
+    revueWrap.classList.remove('hidden');
+    revueWrap.style.display='flex';
+    // Peupler le select équipe
+    const teamSel=document.getElementById('modalTeamFilter');
+    const teams=[...new Set(allT.filter(t=>t.status===(type==='inTester'?document.getElementById('colTester').value.trim():'9 - A LIVRER EN PROD')).map(t=>t.team))].sort();
+    const currentTeam=teamSel.value;
+    teamSel.innerHTML='<option value="all">Toutes ('+teams.length+')</option>'+teams.map(t=>'<option value="'+t+'"'+(t===currentTeam?' selected':'')+'>'+t+'</option>').join('');
+  } else {
+    revueWrap.classList.add('hidden');
+    revueWrap.style.display='none';
+    if(document.getElementById('modalRevueFilter'))document.getElementById('modalRevueFilter').value='all';
+    if(document.getElementById('modalTeamFilter'))document.getElementById('modalTeamFilter').value='all';
+  }
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalCount').textContent=tickets.length+' ticket'+(tickets.length>1?'s':'');
+
+  const sorted=[...tickets].sort((a,b)=>(a.team||'').localeCompare(b.team||'')||(a.id.localeCompare(b.id)));
+  const color=t=>teamColorMap[t.team]||'#9A9790';
+  document.getElementById('modalList').innerHTML=sorted.length?sorted.map(t=>{
+    const typeCls=t.typeCategory==='us'?'type-us':t.typeCategory==='bug'?'type-bug':'';
+    return '<div class="tcard arrived" style="margin-bottom:6px">'+
+      '<div class="tt">'+
+      '<a class="tid" href="'+JIRA+'/browse/'+t.id+'" target="_blank" style="text-decoration:none">'+t.id+' ↗</a>'+
+      '<span class="type-badge '+typeCls+'">'+t.issueType+'</span>'+
+      '<span class="ttitle" title="'+t.title+'">'+t.title+'</span>'+
+      '</div>'+
+      '<div class="tm">'+
+      '<span style="display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:'+color(t)+';display:inline-block"></span>'+t.team+'</span>'+
+      '<span>👤 '+t.assignee+'</span>'+
+      (t.ad?'<span>📅 '+fd(t.ad.toISOString())+'</span>':'')+
+      (t.delay!==null?'<span class="day-pill">J+'+t.delay+'</span>':'')+
+      '<span>📌 '+t.status+'</span>'+
+      (t.revueCommando&&t.revueCommando==='Validé'?'<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#F0F7EE;color:#2D6A2D;border:1px solid #B4D9B4;font-weight:500">✓ Revue commando</span>':'')+
+      '</div>'+
+      '</div>';
+  }).join(''):'<div class="empty">Aucun ticket</div>';
+
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay')){
+    document.getElementById('modalOverlay').classList.add('hidden');
+  }
+}
+
+let currentModalType='';
 
 function toggleAR(){
   const btn=document.getElementById('arBtn');
@@ -514,6 +706,16 @@ window.addEventListener('load',()=>{
   if(em)document.getElementById('email').value=em;
   const tk=localStorage.getItem('jira_token');
   if(tk){document.getElementById('token').value=tk;document.getElementById('rememberToken').checked=true;}
+  const pwd=localStorage.getItem('app_password');
+  if(pwd){document.getElementById('appPassword').value=pwd;document.getElementById('rememberPassword').checked=true;}
+});
+document.getElementById('appPassword')?.addEventListener('change',()=>{
+  if(document.getElementById('rememberPassword').checked)
+    localStorage.setItem('app_password',document.getElementById('appPassword').value);
+});
+document.getElementById('rememberPassword')?.addEventListener('change',function(){
+  if(!this.checked)localStorage.removeItem('app_password');
+  else localStorage.setItem('app_password',document.getElementById('appPassword').value);
 });
 document.getElementById('token')?.addEventListener('change',()=>{
   if(document.getElementById('rememberToken').checked){
