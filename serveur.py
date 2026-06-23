@@ -8,6 +8,7 @@ import urllib.request
 import urllib.parse
 import json
 import os
+import datetime
 
 PORT = int(os.environ.get("PORT", 5000))
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "Isagri2026")
@@ -62,6 +63,18 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             jira_path = params.get("path", [""])[0]
             jira_query = params.get("query", [""])[0]
             auth = self.headers.get("Authorization", "")
+
+            # Logger la connexion (email extrait du Basic Auth)
+            try:
+                import base64
+                decoded = base64.b64decode(auth.replace("Basic ", "")).decode()
+                email = decoded.split(":")[0]
+                now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                # Logger uniquement les appels sprint (pas tous les changelogs)
+                if "board" in jira_path and "sprint" in jira_path and "issue" not in jira_path:
+                    print(f"  📊 CONNEXION — {email} — {now}")
+            except:
+                pass
 
             if not jira_path or not auth:
                 self.send_response(400)
