@@ -286,8 +286,8 @@ async function api(path,params,retries=2){
       if(useLocal){
         // Via serveur (local ou Render)
         const query=params?new URLSearchParams(params).toString():'';
-        const url=LOCAL+'/jira?path='+encodeURIComponent(path)+(query?'&query='+encodeURIComponent(query):'');
         const pwd=document.getElementById('appPassword')?.value||localStorage.getItem('app_password')||'';
+        const url=LOCAL+'/jira?path='+encodeURIComponent(path)+(query?'&query='+encodeURIComponent(query):'')+'&pwd='+encodeURIComponent(pwd);
         r=await fetch(url,{headers:{'Authorization':auth,'X-App-Password':pwd,'Accept':'application/json'}});
       } else {
         // Via proxy public
